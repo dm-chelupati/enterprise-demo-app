@@ -1,0 +1,22 @@
+name: enterprise-demo-app
+metadata:
+  template: enterprise-demo-app@0.0.1
+workflows:
+  up:
+    steps:
+      - azd: provision
+      - azd: deploy
+hooks:
+  postprovision:
+    posix:
+      shell: sh
+      run: bash scripts/post-provision.sh
+      interactive: false
+      continueOnError: false
+services:
+  api:
+    host: containerapp
+    language: js
+    project: ./src/api
+    docker:
+      path: ./src/api/Dockerfile
