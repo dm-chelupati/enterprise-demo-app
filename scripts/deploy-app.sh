@@ -33,9 +33,9 @@ echo "Generating k8s manifests..."
 # Reset any previous sed replacements in tracked files
 git checkout -- k8s/api-deployment.yaml k8s/storefront-deployment.yaml 2>/dev/null || true
 
-# Apply ACR substitution
-sed -i '' "s|__ACR__|$ACR|g" k8s/api-deployment.yaml k8s/storefront-deployment.yaml 2>/dev/null || \
-sed -i "s|__ACR__|$ACR|g" k8s/api-deployment.yaml k8s/storefront-deployment.yaml
+# Apply ACR substitution — template uses ${ACR_NAME}.azurecr.io
+sed -i '' "s|\${ACR_NAME}.azurecr.io|$ACR|g" k8s/api-deployment.yaml k8s/storefront-deployment.yaml 2>/dev/null || \
+sed -i "s|\${ACR_NAME}.azurecr.io|$ACR|g" k8s/api-deployment.yaml k8s/storefront-deployment.yaml
 
 # Generate configmap
 cat > k8s/configmap.yaml <<EOF
