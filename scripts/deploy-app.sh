@@ -136,8 +136,26 @@ az aks command invoke -g "$RG" -n "$AKS" \
 # Get service IPs
 echo ""
 echo "Getting service endpoints..."
-az aks command invoke -g "$RG" -n "$AKS" \
-  --command "kubectl get svc -n zava" 2>/dev/null || true
+SVC_OUTPUT=$(az aks command invoke -g "$RG" -n "$AKS" \
+  --command "kubectl get svc zava-storefront -n zava -o jsonpath='{.status.loadBalancer.ingress[0].ip}'" 2>/dev/null || true)
+STOREFRONT_IP=$(echo "$SVC_OUTPUT" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+
+if [[ -n "$STOREFRONT_IP" ]]; then
+  azd env set STOREFRONT_IP "$STOREFRONT_IP" 2>/dev/null || true
+fi
 
 echo ""
-echo "App deployment complete. If services show <pending>, wait 1-2 min for LoadBalancer IP."
+echo "════════════════════════════════════════════════════════"
+echo "  App deployment complete"
+echo "════════════════════════════════════════════════════════"
+echo "  Resource Group:  $RG"
+echo "  AKS Cluster:     $AKS"
+echo "  ACR:             $ACR"
+echo "  PostgreSQL:      $PG_FQDN"
+if [[ -n "$STOREFRONT_IP" ]]; then
+  echo "  Storefront URL:  http://$STOREFRONT_IP"
+else
+  echo "  Storefront URL:  (LoadBalancer IP pending — check in 1-2 min)"
+  echo "    az aks command invoke -g $RG -n $AKS --command 'kubectl get svc -n zava'"
+fi
+echo "════════════════════════════════════════════════════════"

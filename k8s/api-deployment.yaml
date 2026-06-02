@@ -21,7 +21,7 @@ spec:
         runAsUser: 1000
       containers:
         - name: api
-          image: "${ACR_NAME}.azurecr.io/zava-api:latest"
+          image: "acrzava3lnfkod3vrxjw.azurecr.io/zava-api:latest"
           ports:
             - containerPort: 3001
           envFrom:
