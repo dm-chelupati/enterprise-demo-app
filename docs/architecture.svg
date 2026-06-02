@@ -1,197 +1,71 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 720" font-family="Segoe UI, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" font-family="Segoe UI, Arial, sans-serif">
   <defs>
-    <linearGradient id="vnetBg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#1a1f35"/>
-      <stop offset="100%" stop-color="#0d1117"/>
-    </linearGradient>
-    <linearGradient id="amplsBg" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#1e2740"/>
-      <stop offset="100%" stop-color="#162030"/>
-    </linearGradient>
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="2" result="blur"/>
-      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-    </filter>
-    <filter id="shadow">
-      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.3"/>
-    </filter>
+    <marker id="a" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#555"/></marker>
+    <filter id="s"><feDropShadow dx="0" dy="1" stdDeviation="3" flood-opacity="0.2"/></filter>
   </defs>
 
-  <!-- Background -->
-  <rect width="1100" height="720" rx="16" fill="#0d1117"/>
+  <rect width="800" height="480" rx="12" fill="#0d1117"/>
 
-  <!-- Title -->
-  <text x="550" y="40" text-anchor="middle" fill="#e6edf3" font-size="20" font-weight="700" letter-spacing="0.05em">ENTERPRISE DEMO APP — ARCHITECTURE</text>
-  <text x="550" y="62" text-anchor="middle" fill="#8b949e" font-size="12" letter-spacing="0.1em">rg-enterprise-demo-swe · swedencentral · Private AKS + AMPLS + PostgreSQL</text>
+  <!-- VNet -->
+  <rect x="30" y="30" width="740" height="360" rx="16" fill="none" stroke="#30363d" stroke-width="2" stroke-dasharray="10,5"/>
+  <text x="50" y="55" fill="#58a6ff" font-size="13" font-weight="600">Private VNet</text>
 
-  <!-- VNet boundary -->
-  <rect x="40" y="85" width="1020" height="540" rx="12" fill="url(#vnetBg)" stroke="#30363d" stroke-width="1.5" stroke-dasharray="8,4"/>
-  <text x="60" y="108" fill="#58a6ff" font-size="11" font-weight="600" letter-spacing="0.08em">VNET · vnet-enterprise-* · 10.0.0.0/8</text>
+  <!-- AKS -->
+  <rect x="60" y="80" width="280" height="180" rx="12" fill="#161b22" stroke="#1f6feb" stroke-width="1.5" filter="url(#s)"/>
+  <text x="200" y="108" text-anchor="middle" fill="#58a6ff" font-size="14" font-weight="700">AKS (Private)</text>
 
-  <!-- AKS Subnet -->
-  <rect x="60" y="125" width="480" height="340" rx="10" fill="rgba(56,139,253,0.06)" stroke="#1f6feb" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="80" y="148" fill="#1f6feb" font-size="10" font-weight="600" letter-spacing="0.06em">AKS SUBNET · 10.0.0.0/16</text>
+  <rect x="85" y="125" width="100" height="45" rx="8" fill="#1c2333" stroke="#238636" stroke-width="1.5"/>
+  <circle cx="98" cy="142" r="4" fill="#238636"/>
+  <text x="140" y="148" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600">Storefront</text>
 
-  <!-- AKS Cluster box -->
-  <rect x="80" y="160" width="440" height="290" rx="8" fill="rgba(56,139,253,0.04)" stroke="#30363d" stroke-width="1" filter="url(#shadow)"/>
-  <text x="100" y="183" fill="#e6edf3" font-size="13" font-weight="700">AKS Cluster</text>
-  <text x="260" y="183" fill="#8b949e" font-size="10">aks-Zava-* · Private API Server</text>
+  <rect x="215" y="125" width="100" height="45" rx="8" fill="#1c2333" stroke="#238636" stroke-width="1.5"/>
+  <circle cx="228" cy="142" r="4" fill="#238636"/>
+  <text x="265" y="148" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600">API</text>
 
-  <!-- Storefront pod -->
-  <rect x="100" y="200" width="180" height="70" rx="6" fill="#161b22" stroke="#238636" stroke-width="1.5"/>
-  <circle cx="116" cy="220" r="6" fill="#238636" filter="url(#glow)"/>
-  <text x="128" y="224" fill="#e6edf3" font-size="11" font-weight="600">zava-storefront</text>
-  <text x="100" y="245" fill="#8b949e" font-size="9" text-anchor="start">
-    <tspan x="110">Node.js · Port 3000</tspan>
-    <tspan x="110" dy="13">Dark theme · Product grid</tspan>
-  </text>
+  <line x1="185" y1="147" x2="215" y2="147" stroke="#555" stroke-width="1.5" marker-end="url(#a)"/>
 
-  <!-- API pod -->
-  <rect x="310" y="200" width="190" height="70" rx="6" fill="#161b22" stroke="#238636" stroke-width="1.5"/>
-  <circle cx="326" cy="220" r="6" fill="#238636" filter="url(#glow)"/>
-  <text x="338" y="224" fill="#e6edf3" font-size="11" font-weight="600">zava-api</text>
-  <text x="310" y="245" fill="#8b949e" font-size="9" text-anchor="start">
-    <tspan x="320">Node.js · Port 3001</tspan>
-    <tspan x="320" dy="13">App Insights SDK</tspan>
-  </text>
-
-  <!-- Arrow: Storefront → API -->
-  <line x1="280" y1="235" x2="310" y2="235" stroke="#58a6ff" stroke-width="1.5" marker-end="url(#arrowBlue)"/>
-  <defs><marker id="arrowBlue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#58a6ff"/></marker></defs>
-
-  <!-- LoadBalancer -->
-  <rect x="100" y="295" width="180" height="40" rx="6" fill="#161b22" stroke="#6e40c9" stroke-width="1"/>
-  <text x="190" y="320" text-anchor="middle" fill="#d2a8ff" font-size="10" font-weight="600">LoadBalancer · :80</text>
-
-  <!-- Arrow: LB → Storefront -->
-  <line x1="190" y1="295" x2="190" y2="270" stroke="#d2a8ff" stroke-width="1" marker-end="url(#arrowPurple)"/>
-  <defs><marker id="arrowPurple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#d2a8ff"/></marker></defs>
-
-  <!-- External user -->
-  <rect x="100" y="355" width="180" height="35" rx="6" fill="rgba(110,64,201,0.15)" stroke="#6e40c9" stroke-width="1" stroke-dasharray="3,2"/>
-  <text x="190" y="377" text-anchor="middle" fill="#d2a8ff" font-size="9">http://4.166.117.164</text>
-  <line x1="190" y1="355" x2="190" y2="335" stroke="#6e40c9" stroke-width="1" stroke-dasharray="3,2"/>
-
-  <!-- Health status indicator -->
-  <rect x="310" y="295" width="190" height="40" rx="6" fill="#0d1117" stroke="#238636" stroke-width="1"/>
-  <circle cx="326" cy="315" r="5" fill="#238636" filter="url(#glow)"/>
-  <text x="338" y="319" fill="#238636" font-size="10" font-weight="600">ALL SYSTEMS OPERATIONAL</text>
-
-  <!-- Agent access path -->
-  <rect x="310" y="355" width="190" height="80" rx="6" fill="rgba(56,139,253,0.08)" stroke="#1f6feb" stroke-width="1"/>
-  <text x="405" y="375" text-anchor="middle" fill="#58a6ff" font-size="10" font-weight="600">SRE Agent Access</text>
-  <text x="320" y="392" fill="#8b949e" font-size="9">az aks command invoke</text>
-  <text x="320" y="405" fill="#8b949e" font-size="9">kubectl get/logs/exec</text>
-  <text x="320" y="418" fill="#8b949e" font-size="9">ARM proxy (no VPN needed)</text>
-
-  <!-- DB Subnet -->
-  <rect x="560" y="125" width="240" height="180" rx="10" fill="rgba(218,142,53,0.06)" stroke="#da8e35" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="580" y="148" fill="#da8e35" font-size="10" font-weight="600" letter-spacing="0.06em">DB SUBNET · 10.1.0.0/24</text>
+  <rect x="100" y="195" width="75" height="28" rx="6" fill="#1c2333" stroke="#6e40c9" stroke-width="1"/>
+  <text x="137" y="214" text-anchor="middle" fill="#d2a8ff" font-size="9" font-weight="600">LB :80</text>
+  <line x1="137" y1="195" x2="137" y2="170" stroke="#6e40c9" stroke-width="1" marker-end="url(#a)"/>
 
   <!-- PostgreSQL -->
-  <rect x="580" y="165" width="200" height="120" rx="8" fill="#161b22" stroke="#da8e35" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="680" y="192" text-anchor="middle" fill="#e6edf3" font-size="13" font-weight="700">PostgreSQL 16</text>
-  <text x="680" y="210" text-anchor="middle" fill="#8b949e" font-size="9">zava-pg-* · Flexible Server</text>
-  <text x="680" y="228" text-anchor="middle" fill="#da8e35" font-size="9" font-weight="600">VNet-delegated · No public access</text>
-  <text x="680" y="246" text-anchor="middle" fill="#8b949e" font-size="9">Entra + Password auth</text>
-  <text x="680" y="264" text-anchor="middle" fill="#8b949e" font-size="9">DB: postgres</text>
+  <rect x="420" y="80" width="180" height="75" rx="12" fill="#161b22" stroke="#da8e35" stroke-width="1.5" filter="url(#s)"/>
+  <text x="510" y="110" text-anchor="middle" fill="#da8e35" font-size="14" font-weight="700">PostgreSQL</text>
+  <text x="510" y="130" text-anchor="middle" fill="#8b949e" font-size="10">VNet-delegated · Private</text>
 
-  <!-- Arrow: API → PG -->
-  <line x1="500" y1="235" x2="580" y2="225" stroke="#da8e35" stroke-width="1.5" marker-end="url(#arrowOrange)"/>
-  <defs><marker id="arrowOrange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#da8e35"/></marker></defs>
+  <line x1="315" y1="147" x2="420" y2="118" stroke="#da8e35" stroke-width="1.5" marker-end="url(#a)"/>
 
-  <!-- AMPLS Subnet -->
-  <rect x="560" y="325" width="480" height="180" rx="10" fill="url(#amplsBg)" stroke="#f78166" stroke-width="1" stroke-dasharray="4,3"/>
-  <text x="580" y="348" fill="#f78166" font-size="10" font-weight="600" letter-spacing="0.06em">AMPLS SUBNET · 10.3.0.0/24 · Azure Monitor Private Link Scope</text>
+  <!-- AMPLS -->
+  <rect x="420" y="200" width="330" height="130" rx="12" fill="#161b22" stroke="#f78166" stroke-width="1.5" filter="url(#s)"/>
+  <text x="585" y="228" text-anchor="middle" fill="#f78166" font-size="13" font-weight="700">AMPLS (Private Link)</text>
 
-  <!-- Private Endpoint -->
-  <rect x="580" y="360" width="160" height="60" rx="6" fill="#161b22" stroke="#f78166" stroke-width="1.5"/>
-  <text x="660" y="385" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600">Private Endpoint</text>
-  <text x="660" y="400" text-anchor="middle" fill="#f78166" font-size="9">pe-ampls-*</text>
+  <rect x="450" y="250" width="80" height="35" rx="6" fill="#1c2333" stroke="#bc8cff" stroke-width="1"/>
+  <text x="490" y="272" text-anchor="middle" fill="#bc8cff" font-size="10">App Insights</text>
 
-  <!-- App Insights -->
-  <rect x="770" y="360" width="130" height="55" rx="6" fill="#161b22" stroke="#bc8cff" stroke-width="1.5"/>
-  <text x="835" y="383" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600">App Insights</text>
-  <text x="835" y="398" text-anchor="middle" fill="#bc8cff" font-size="9">ai-* · Private only</text>
+  <rect x="560" y="250" width="60" height="35" rx="6" fill="#1c2333" stroke="#bc8cff" stroke-width="1"/>
+  <text x="590" y="272" text-anchor="middle" fill="#bc8cff" font-size="10">LAW</text>
 
-  <!-- LAW -->
-  <rect x="920" y="360" width="105" height="55" rx="6" fill="#161b22" stroke="#bc8cff" stroke-width="1.5"/>
-  <text x="972" y="383" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600">LAW</text>
-  <text x="972" y="398" text-anchor="middle" fill="#bc8cff" font-size="9">law-* · Private only</text>
+  <text x="585" y="310" text-anchor="middle" fill="#8b949e" font-size="9">Private ingestion + query</text>
 
-  <!-- Arrows: PE → AI, PE → LAW -->
-  <line x1="740" y1="390" x2="770" y2="387" stroke="#bc8cff" stroke-width="1" marker-end="url(#arrowLavender)"/>
-  <line x1="740" y1="390" x2="920" y2="387" stroke="#bc8cff" stroke-width="1" marker-end="url(#arrowLavender)"/>
-  <defs><marker id="arrowLavender" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#bc8cff"/></marker></defs>
+  <path d="M 265 170 L 265 270 L 450 270" fill="none" stroke="#f78166" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#a)"/>
 
-  <!-- Arrow: API → PE (telemetry) -->
-  <path d="M 405 270 L 405 390 L 580 390" fill="none" stroke="#f78166" stroke-width="1" stroke-dasharray="4,2" marker-end="url(#arrowRed)"/>
-  <defs><marker id="arrowRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#f78166"/></marker></defs>
-  <text x="430" y="340" fill="#f78166" font-size="8" transform="rotate(90, 430, 340)">telemetry</text>
+  <!-- External row -->
+  <text x="50" y="425" fill="#8b949e" font-size="10" letter-spacing="0.05em">EXTERNAL</text>
 
-  <!-- AMPLS info -->
-  <rect x="580" y="440" width="440" height="50" rx="6" fill="rgba(247,129,102,0.06)" stroke="none"/>
-  <text x="800" y="460" text-anchor="middle" fill="#f78166" font-size="9" font-weight="600">AMPLS: ampls-*</text>
-  <text x="800" y="475" text-anchor="middle" fill="#8b949e" font-size="8">Ingestion: PrivateOnly · Query: PrivateOnly · 4 Private DNS Zones linked to VNet</text>
+  <rect x="120" y="410" width="80" height="30" rx="6" fill="#1c2333" stroke="#6e40c9" stroke-width="1"/>
+  <text x="160" y="430" text-anchor="middle" fill="#d2a8ff" font-size="10">Users</text>
 
-  <!-- External services (below VNet) -->
-  <rect x="40" y="640" width="1020" height="65" rx="10" fill="rgba(56,139,253,0.04)" stroke="#30363d" stroke-width="1"/>
-  <text x="60" y="660" fill="#8b949e" font-size="10" font-weight="600" letter-spacing="0.06em">EXTERNAL SERVICES</text>
+  <rect x="230" y="410" width="90" height="30" rx="6" fill="#1c2333" stroke="#f0f6fc" stroke-width="1"/>
+  <text x="275" y="430" text-anchor="middle" fill="#f0f6fc" font-size="10">GitHub</text>
 
-  <!-- ACR -->
-  <rect x="80" y="670" width="100" height="25" rx="4" fill="#161b22" stroke="#30363d" stroke-width="1"/>
-  <text x="130" y="687" text-anchor="middle" fill="#e6edf3" font-size="9">ACR</text>
+  <rect x="345" y="410" width="95" height="30" rx="6" fill="#1c2333" stroke="#81b5f0" stroke-width="1"/>
+  <text x="392" y="430" text-anchor="middle" fill="#81b5f0" font-size="10">ServiceNow</text>
 
-  <!-- Dynatrace -->
-  <rect x="200" y="670" width="100" height="25" rx="4" fill="#161b22" stroke="#1aad1a" stroke-width="1"/>
-  <text x="250" y="687" text-anchor="middle" fill="#1aad1a" font-size="9">Dynatrace MCP</text>
+  <rect x="465" y="410" width="90" height="30" rx="6" fill="#1c2333" stroke="#1aad1a" stroke-width="1"/>
+  <text x="510" y="430" text-anchor="middle" fill="#1aad1a" font-size="10">Dynatrace</text>
 
-  <!-- ServiceNow -->
-  <rect x="320" y="670" width="100" height="25" rx="4" fill="#161b22" stroke="#81b5f0" stroke-width="1"/>
-  <text x="370" y="687" text-anchor="middle" fill="#81b5f0" font-size="9">ServiceNow</text>
+  <rect x="580" y="410" width="60" height="30" rx="6" fill="#1c2333" stroke="#2684ff" stroke-width="1"/>
+  <text x="610" y="430" text-anchor="middle" fill="#2684ff" font-size="10">Jira</text>
 
-  <!-- GitHub Enterprise -->
-  <rect x="440" y="670" width="130" height="25" rx="4" fill="#161b22" stroke="#f0f6fc" stroke-width="1"/>
-  <text x="505" y="687" text-anchor="middle" fill="#f0f6fc" font-size="9">GitHub Enterprise</text>
-
-  <!-- Jira -->
-  <rect x="590" y="670" width="80" height="25" rx="4" fill="#161b22" stroke="#2684ff" stroke-width="1"/>
-  <text x="630" y="687" text-anchor="middle" fill="#2684ff" font-size="9">Jira</text>
-
-  <!-- SRE Agent -->
-  <rect x="820" y="125" width="220" height="180" rx="10" fill="rgba(238,130,68,0.08)" stroke="#ee8244" stroke-width="1.5" filter="url(#shadow)"/>
-  <text x="930" y="150" text-anchor="middle" fill="#ee8244" font-size="12" font-weight="700">SRE Agent</text>
-  <text x="930" y="167" text-anchor="middle" fill="#8b949e" font-size="9">cg-poc-enterprise</text>
-  <text x="840" y="190" fill="#e6edf3" font-size="9">
-    <tspan x="840">VNet-integrated</tspan>
-    <tspan x="840" dy="15">Dynatrace MCP connector</tspan>
-    <tspan x="840" dy="15">LAW connector (AMPLS)</tspan>
-    <tspan x="840" dy="15">GitHub Enterprise (BYOA)</tspan>
-    <tspan x="840" dy="15">Jira (ConnectorV2)</tspan>
-    <tspan x="840" dy="15">ServiceNow incidents</tspan>
-    <tspan x="840" dy="15">Tool policies · Hooks</tspan>
-  </text>
-
-  <!-- Arrow: Agent → AKS -->
-  <line x1="820" y1="215" x2="500" y2="215" stroke="#ee8244" stroke-width="1.5" stroke-dasharray="6,3" marker-end="url(#arrowAgent)"/>
-  <defs><marker id="arrowAgent" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#ee8244"/></marker></defs>
-  <text x="660" y="208" fill="#ee8244" font-size="8">az aks command invoke</text>
-
-  <!-- Arrow: Agent → PG -->
-  <line x1="820" y1="240" x2="780" y2="240" stroke="#ee8244" stroke-width="1" stroke-dasharray="4,2"/>
-  <line x1="780" y1="240" x2="780" y2="200" stroke="#ee8244" stroke-width="1" stroke-dasharray="4,2"/>
-  <line x1="780" y1="200" x2="680" y2="200" stroke="#ee8244" stroke-width="1" stroke-dasharray="4,2" marker-end="url(#arrowAgent)"/>
-
-  <!-- Arrow: Agent → AMPLS -->
-  <line x1="930" y1="305" x2="930" y2="360" stroke="#ee8244" stroke-width="1" stroke-dasharray="4,2" marker-end="url(#arrowAgent)"/>
-  <text x="940" y="335" fill="#ee8244" font-size="8">private query</text>
-
-  <!-- Legend -->
-  <text x="60" y="610" fill="#8b949e" font-size="9">
-    <tspan fill="#238636">●</tspan> Running pods
-    <tspan dx="20" fill="#ee8244">◆</tspan> SRE Agent access path
-    <tspan dx="20" fill="#f78166">━</tspan> Telemetry via AMPLS
-    <tspan dx="20" fill="#da8e35">━</tspan> DB connection (VNet internal)
-    <tspan dx="20" fill="#6e40c9">━</tspan> External user access
-  </text>
+  <line x1="160" y1="410" x2="137" y2="260" stroke="#6e40c9" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#a)"/>
 </svg>

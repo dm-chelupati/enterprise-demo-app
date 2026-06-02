@@ -27,7 +27,7 @@ const pool = new Pool({
   port: parseInt(process.env.DB_PORT || '5432'),
   database: process.env.DB_NAME || 'zava_store',
   user: process.env.DB_USER || process.env.AZURE_CLIENT_ID || 'zavaadmin',
-  password: getAccessToken,  // pg calls this function before each connect
+  password: process.env.DB_PASSWORD || getAccessToken,  // use static password if set, otherwise Entra token
   // Azure PG Flexible Server presents a publicly-trusted DigiCert cert, so
   // verification works out-of-the-box. Set DB_SSL_REJECT_UNAUTHORIZED=false
   // only for local/dev scenarios with a self-signed cert.
