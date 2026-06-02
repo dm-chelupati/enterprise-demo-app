@@ -3,7 +3,6 @@
     <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#94a3b8"/></marker>
   </defs>
 
-  <!-- Background -->
   <rect width="780" height="440" rx="8" fill="#f8fafc"/>
 
   <!-- VNet boundary -->
@@ -12,53 +11,96 @@
   <text x="86" y="30" text-anchor="middle" fill="#475569" font-size="11" font-weight="600">Private VNet</text>
 
   <!-- AKS -->
-  <rect x="50" y="60" width="220" height="140" rx="10" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5"/>
-  <text x="160" y="86" text-anchor="middle" fill="#1e40af" font-size="14" font-weight="700">AKS</text>
-  <text x="160" y="102" text-anchor="middle" fill="#64748b" font-size="10">Private cluster</text>
+  <rect x="50" y="55" width="240" height="155" rx="10" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5"/>
+  <!-- K8s wheel icon -->
+  <circle cx="80" cy="80" r="14" fill="none" stroke="#3b82f6" stroke-width="2"/>
+  <circle cx="80" cy="80" r="4" fill="#3b82f6"/>
+  <line x1="80" y1="64" x2="80" y2="70" stroke="#3b82f6" stroke-width="2"/>
+  <line x1="80" y1="90" x2="80" y2="96" stroke="#3b82f6" stroke-width="2"/>
+  <line x1="64" y1="80" x2="70" y2="80" stroke="#3b82f6" stroke-width="2"/>
+  <line x1="90" y1="80" x2="96" y2="80" stroke="#3b82f6" stroke-width="2"/>
+  <line x1="70" y1="69" x2="74" y2="73" stroke="#3b82f6" stroke-width="2"/>
+  <line x1="86" y1="87" x2="90" y2="91" stroke="#3b82f6" stroke-width="2"/>
+  <line x1="70" y1="91" x2="74" y2="87" stroke="#3b82f6" stroke-width="2"/>
+  <line x1="86" y1="73" x2="90" y2="69" stroke="#3b82f6" stroke-width="2"/>
+  <text x="100" y="76" fill="#1e40af" font-size="14" font-weight="700">AKS</text>
+  <text x="100" y="92" fill="#64748b" font-size="10">Private cluster</text>
 
-  <rect x="70" y="118" width="80" height="36" rx="6" fill="#fff" stroke="#3b82f6" stroke-width="1"/>
-  <circle cx="84" cy="136" r="4" fill="#22c55e"/>
-  <text x="118" y="140" text-anchor="middle" fill="#1e293b" font-size="10" font-weight="600">Storefront</text>
+  <!-- Storefront pod -->
+  <rect x="70" y="115" width="90" height="40" rx="6" fill="#fff" stroke="#3b82f6" stroke-width="1"/>
+  <circle cx="84" cy="135" r="4" fill="#22c55e"/>
+  <text x="120" y="139" text-anchor="middle" fill="#1e293b" font-size="10" font-weight="600">Storefront</text>
 
-  <rect x="170" y="118" width="80" height="36" rx="6" fill="#fff" stroke="#3b82f6" stroke-width="1"/>
-  <circle cx="184" cy="136" r="4" fill="#22c55e"/>
-  <text x="218" y="140" text-anchor="middle" fill="#1e293b" font-size="10" font-weight="600">API</text>
+  <!-- API pod -->
+  <rect x="180" y="115" width="90" height="40" rx="6" fill="#fff" stroke="#3b82f6" stroke-width="1"/>
+  <circle cx="194" cy="135" r="4" fill="#22c55e"/>
+  <text x="230" y="139" text-anchor="middle" fill="#1e293b" font-size="10" font-weight="600">API</text>
 
-  <line x1="150" y1="136" x2="170" y2="136" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr)"/>
+  <line x1="160" y1="135" x2="180" y2="135" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr)"/>
 
   <!-- PostgreSQL -->
-  <rect x="340" y="95" width="170" height="70" rx="10" fill="#fefce8" stroke="#eab308" stroke-width="1.5"/>
-  <text x="425" y="125" text-anchor="middle" fill="#854d0e" font-size="14" font-weight="700">PostgreSQL</text>
-  <text x="425" y="143" text-anchor="middle" fill="#64748b" font-size="10">Private · VNet-delegated</text>
+  <rect x="360" y="75" width="170" height="80" rx="10" fill="#fefce8" stroke="#eab308" stroke-width="1.5"/>
+  <!-- DB cylinder icon -->
+  <ellipse cx="390" cy="100" rx="14" ry="6" fill="none" stroke="#eab308" stroke-width="1.5"/>
+  <line x1="376" y1="100" x2="376" y2="120" stroke="#eab308" stroke-width="1.5"/>
+  <line x1="404" y1="100" x2="404" y2="120" stroke="#eab308" stroke-width="1.5"/>
+  <ellipse cx="390" cy="120" rx="14" ry="6" fill="none" stroke="#eab308" stroke-width="1.5"/>
+  <text x="412" y="108" fill="#854d0e" font-size="13" font-weight="700">PostgreSQL</text>
+  <text x="412" y="124" fill="#64748b" font-size="9">Private · VNet-delegated</text>
 
-  <!-- Arrow API → PG (straight horizontal) -->
-  <line x1="250" y1="136" x2="340" y2="132" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr)"/>
+  <!-- Arrow API → PG -->
+  <line x1="270" y1="135" x2="360" y2="115" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr)"/>
 
   <!-- AMPLS -->
-  <rect x="340" y="210" width="390" height="100" rx="10" fill="#fdf4ff" stroke="#a855f7" stroke-width="1.5"/>
-  <text x="535" y="238" text-anchor="middle" fill="#6b21a8" font-size="13" font-weight="700">Azure Monitor Private Link</text>
+  <rect x="360" y="200" width="370" height="110" rx="10" fill="#fdf4ff" stroke="#a855f7" stroke-width="1.5"/>
+  <!-- Monitor icon (eye) -->
+  <ellipse cx="390" cy="228" rx="14" ry="8" fill="none" stroke="#a855f7" stroke-width="1.5"/>
+  <circle cx="390" cy="228" r="4" fill="#a855f7"/>
+  <text x="410" y="232" fill="#6b21a8" font-size="13" font-weight="700">Azure Monitor Private Link</text>
 
-  <rect x="370" y="255" width="100" height="32" rx="6" fill="#fff" stroke="#a855f7" stroke-width="1"/>
-  <text x="420" y="276" text-anchor="middle" fill="#1e293b" font-size="10" font-weight="600">App Insights</text>
+  <!-- App Insights -->
+  <rect x="385" y="252" width="100" height="32" rx="6" fill="#fff" stroke="#a855f7" stroke-width="1"/>
+  <text x="435" y="273" text-anchor="middle" fill="#1e293b" font-size="10" font-weight="600">App Insights</text>
 
-  <rect x="500" y="255" width="60" height="32" rx="6" fill="#fff" stroke="#a855f7" stroke-width="1"/>
-  <text x="530" y="276" text-anchor="middle" fill="#1e293b" font-size="10" font-weight="600">LAW</text>
+  <!-- LAW -->
+  <rect x="510" y="252" width="70" height="32" rx="6" fill="#fff" stroke="#a855f7" stroke-width="1"/>
+  <text x="545" y="273" text-anchor="middle" fill="#1e293b" font-size="10" font-weight="600">LAW</text>
 
-  <text x="535" y="300" text-anchor="middle" fill="#94a3b8" font-size="9">Private ingestion + query</text>
+  <text x="495" y="298" text-anchor="middle" fill="#94a3b8" font-size="9">Private ingestion + query</text>
 
-  <!-- Arrow API → AMPLS telemetry -->
-  <path d="M 210 154 L 210 270 L 370 270" fill="none" stroke="#a855f7" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+  <!-- Arrow API → AMPLS -->
+  <path d="M 225 155 L 225 268 L 385 268" fill="none" stroke="#a855f7" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
 
-  <!-- External services row -->
-  <rect x="50" y="370" width="125" height="36" rx="8" fill="#fff" stroke="#1e293b" stroke-width="1.2"/>
-  <text x="112" y="393" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="600">GitHub Enterprise</text>
+  <!-- External services -->
+  <!-- GitHub Enterprise -->
+  <rect x="50" y="370" width="135" height="40" rx="8" fill="#fff" stroke="#1e293b" stroke-width="1.2"/>
+  <!-- GitHub octocat simplified -->
+  <circle cx="72" cy="390" r="10" fill="none" stroke="#1e293b" stroke-width="1.2"/>
+  <circle cx="68" cy="387" r="1.5" fill="#1e293b"/>
+  <circle cx="76" cy="387" r="1.5" fill="#1e293b"/>
+  <path d="M 66 393 Q 72 397, 78 393" fill="none" stroke="#1e293b" stroke-width="1"/>
+  <text x="88" y="394" fill="#1e293b" font-size="10" font-weight="600">GitHub Ent.</text>
 
-  <rect x="200" y="370" width="100" height="36" rx="8" fill="#fff" stroke="#0ea5e9" stroke-width="1.2"/>
-  <text x="250" y="393" text-anchor="middle" fill="#0369a1" font-size="11" font-weight="600">ServiceNow</text>
+  <!-- ServiceNow -->
+  <rect x="210" y="370" width="110" height="40" rx="8" fill="#fff" stroke="#0ea5e9" stroke-width="1.2"/>
+  <!-- Ticket icon -->
+  <rect x="224" y="381" width="14" height="18" rx="2" fill="none" stroke="#0ea5e9" stroke-width="1.2"/>
+  <line x1="227" y1="386" x2="235" y2="386" stroke="#0ea5e9" stroke-width="1"/>
+  <line x1="227" y1="390" x2="233" y2="390" stroke="#0ea5e9" stroke-width="1"/>
+  <line x1="227" y1="394" x2="234" y2="394" stroke="#0ea5e9" stroke-width="1"/>
+  <text x="244" y="394" fill="#0369a1" font-size="10" font-weight="600">ServiceNow</text>
 
-  <rect x="325" y="370" width="90" height="36" rx="8" fill="#fff" stroke="#22c55e" stroke-width="1.2"/>
-  <text x="370" y="393" text-anchor="middle" fill="#166534" font-size="11" font-weight="600">Dynatrace</text>
+  <!-- Dynatrace -->
+  <rect x="345" y="370" width="100" height="40" rx="8" fill="#fff" stroke="#22c55e" stroke-width="1.2"/>
+  <!-- Chart icon -->
+  <rect x="358" y="394" width="4" height="8" rx="1" fill="#22c55e" transform="translate(0,-8)"/>
+  <rect x="365" y="394" width="4" height="14" rx="1" fill="#22c55e" transform="translate(0,-14)"/>
+  <rect x="372" y="394" width="4" height="10" rx="1" fill="#22c55e" transform="translate(0,-10)"/>
+  <text x="384" y="394" fill="#166534" font-size="10" font-weight="600">Dynatrace</text>
 
-  <rect x="440" y="370" width="60" height="36" rx="8" fill="#fff" stroke="#3b82f6" stroke-width="1.2"/>
-  <text x="470" y="393" text-anchor="middle" fill="#1d4ed8" font-size="11" font-weight="600">Jira</text>
+  <!-- Jira -->
+  <rect x="470" y="370" width="65" height="40" rx="8" fill="#fff" stroke="#3b82f6" stroke-width="1.2"/>
+  <!-- Diamond icon -->
+  <polygon points="492,378 502,390 492,402 482,390" fill="none" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="510" y="394" fill="#1d4ed8" font-size="10" font-weight="600">Jira</text>
 </svg>
