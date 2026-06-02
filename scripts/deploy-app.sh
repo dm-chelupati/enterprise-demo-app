@@ -37,7 +37,7 @@ git checkout -- k8s/api-deployment.yaml k8s/storefront-deployment.yaml 2>/dev/nu
 sed -i '' "s|\${ACR_NAME}.azurecr.io|$ACR|g" k8s/api-deployment.yaml k8s/storefront-deployment.yaml 2>/dev/null || \
 sed -i "s|\${ACR_NAME}.azurecr.io|$ACR|g" k8s/api-deployment.yaml k8s/storefront-deployment.yaml
 
-# Generate configmap
+# Generate configmap — env var names must match src/zava-api/db/client.js
 cat > k8s/configmap.yaml <<EOF
 apiVersion: v1
 kind: ConfigMap
@@ -45,11 +45,11 @@ metadata:
   name: zava-config
   namespace: zava
 data:
-  PG_HOST: "$PG_FQDN"
-  PG_DATABASE: "postgres"
-  PG_PORT: "5432"
-  PG_USER: "appadmin"
-  PG_PASSWORD: "DemoP@ss2026!"
+  DB_HOST: "$PG_FQDN"
+  DB_NAME: "postgres"
+  DB_PORT: "5432"
+  DB_USER: "appadmin"
+  DB_PASSWORD: "DemoP@ss2026!"
   APPLICATIONINSIGHTS_CONNECTION_STRING: "$AI_CONN"
   API_URL: "http://zava-api:3001"
 EOF
