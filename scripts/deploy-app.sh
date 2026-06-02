@@ -129,9 +129,15 @@ for f in k8s/configmap.yaml k8s/service-account.yaml k8s/secret.yaml k8s/api-dep
   fi
 done
 
+# Restart deployments to pick up configmap/secret changes
+echo "  Restarting deployments..."
+az aks command invoke -g "$RG" -n "$AKS" \
+  --command "kubectl rollout restart deploy/zava-api deploy/zava-storefront -n zava" \
+  2>/dev/null || true
+
 # Wait for pods
 echo "  Waiting for pods..."
-sleep 10
+sleep 20
 az aks command invoke -g "$RG" -n "$AKS" \
   --command "kubectl get pods -n zava -o wide" 2>/dev/null || true
 
