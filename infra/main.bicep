@@ -1,10 +1,10 @@
 targetScope = 'subscription'
 
 @description('Azure region for all resources')
-param location string
+param location string = 'swedencentral'
 
 @description('Resource group name')
-param resourceGroupName string = 'rg-enterprise-demo'
+param resourceGroupName string = 'rg-enterprise-demo-swe'
 
 @description('Unique suffix for globally unique resource names')
 param uniqueSuffix string = take(uniqueString(subscription().subscriptionId, resourceGroupName), 13)
@@ -76,7 +76,7 @@ module identity 'modules/identity.bicep' = {
     location: location
     uniqueSuffix: uniqueSuffix
     aksClusterName: aks.outputs.clusterName
-    appInsightsName: monitoring.outputs.appInsightsAppId
+    appInsightsName: monitoring.outputs.appInsightsName
   }
 }
 

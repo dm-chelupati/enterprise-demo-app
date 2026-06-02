@@ -64,7 +64,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-01-01' = {
       {
         name: 'ampls-subnet'
         properties: {
-          addressPrefix: '10.2.0.0/24'
+          addressPrefix: '10.3.0.0/24'
           privateEndpointNetworkPolicies: 'Disabled'
         }
       }

@@ -170,6 +170,7 @@ output logAnalyticsWorkspaceId string = law.id
 output logAnalyticsWorkspaceName string = law.name
 output logAnalyticsWorkspaceCustomerId string = law.properties.customerId
 output appInsightsId string = appInsights.id
+output appInsightsName string = appInsights.name
 output appInsightsAppId string = appInsights.properties.AppId
 output appInsightsConnectionString string = appInsights.properties.ConnectionString
 output amplsId string = ampls.id

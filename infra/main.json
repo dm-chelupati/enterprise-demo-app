@@ -5,19 +5,20 @@
     "_generator": {
       "name": "bicep",
       "version": "0.40.2.10011",
-      "templateHash": "17680438391017660318"
+      "templateHash": "3757418900006072367"
     }
   },
   "parameters": {
     "location": {
       "type": "string",
+      "defaultValue": "swedencentral",
       "metadata": {
         "description": "Azure region for all resources"
       }
     },
     "resourceGroupName": {
       "type": "string",
-      "defaultValue": "rg-enterprise-demo",
+      "defaultValue": "rg-enterprise-demo-swe",
       "metadata": {
         "description": "Resource group name"
       }
@@ -62,7 +63,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.40.2.10011",
-              "templateHash": "3131674606797609253"
+              "templateHash": "6565541745781677552"
             }
           },
           "parameters": {
@@ -150,7 +151,7 @@
                   {
                     "name": "ampls-subnet",
                     "properties": {
-                      "addressPrefix": "10.2.0.0/24",
+                      "addressPrefix": "10.3.0.0/24",
                       "privateEndpointNetworkPolicies": "Disabled"
                     }
                   }
@@ -442,7 +443,7 @@
             "_generator": {
               "name": "bicep",
               "version": "0.40.2.10011",
-              "templateHash": "17108034369628151486"
+              "templateHash": "17241847544044965033"
             }
           },
           "parameters": {
@@ -688,6 +689,10 @@
             "appInsightsId": {
               "type": "string",
               "value": "[resourceId('Microsoft.Insights/components', variables('aiName'))]"
+            },
+            "appInsightsName": {
+              "type": "string",
+              "value": "[variables('aiName')]"
             },
             "appInsightsAppId": {
               "type": "string",
@@ -1115,7 +1120,7 @@
             "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'aks'), '2025-04-01').outputs.clusterName.value]"
           },
           "appInsightsName": {
-            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'monitoring'), '2025-04-01').outputs.appInsightsAppId.value]"
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'monitoring'), '2025-04-01').outputs.appInsightsName.value]"
           }
         },
         "template": {
