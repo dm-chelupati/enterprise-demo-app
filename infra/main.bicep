@@ -93,8 +93,21 @@ module keyvault 'modules/keyvault.bicep' = if (githubAppClientId != '') {
   }
 }
 
+// Register app workload identity as PG Entra admin (for password-less DB access)
+module pgAdminAppIdentity 'modules/pg-admin.bicep' = {
+  scope: rg
+  name: 'pgAdminAppIdentity'
+  params: {
+    pgServerName: postgresql.outputs.serverName
+    principalId: identity.outputs.appIdentityPrincipalId
+    principalName: identity.outputs.appIdentityName
+    principalType: 'ServicePrincipal'
+  }
+}
+
 output RESOURCE_GROUP string = rg.name
 output AKS_CLUSTER_NAME string = aks.outputs.clusterName
+output AKS_OIDC_ISSUER string = aks.outputs.oidcIssuerUrl
 output ACR_NAME string = acr.outputs.acrName
 output ACR_LOGIN_SERVER string = acr.outputs.acrLoginServer
 output PG_SERVER_NAME string = postgresql.outputs.serverName

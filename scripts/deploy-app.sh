@@ -38,6 +38,8 @@ sed -i '' "s|\${ACR_NAME}.azurecr.io|$ACR|g" k8s/api-deployment.yaml k8s/storefr
 sed -i "s|\${ACR_NAME}.azurecr.io|$ACR|g" k8s/api-deployment.yaml k8s/storefront-deployment.yaml
 
 # Generate configmap — env var names must match src/zava-api/db/client.js
+# No DB_PASSWORD → app uses DefaultAzureCredential (workload identity → Entra token)
+APP_CLIENT_ID=$(az identity list -g "$RG" --query "[?starts_with(name,'id-Zava-app')].clientId" -o tsv 2>/dev/null)
 cat > k8s/configmap.yaml <<EOF
 apiVersion: v1
 kind: ConfigMap
@@ -48,8 +50,8 @@ data:
   DB_HOST: "$PG_FQDN"
   DB_NAME: "postgres"
   DB_PORT: "5432"
-  DB_USER: "appadmin"
-  DB_PASSWORD: "DemoP@ss2026!"
+  DB_USER: "$APP_CLIENT_ID"
+  AZURE_CLIENT_ID: "$APP_CLIENT_ID"
   APPLICATIONINSIGHTS_CONNECTION_STRING: "$AI_CONN"
   API_URL: "http://zava-api:3001"
 EOF

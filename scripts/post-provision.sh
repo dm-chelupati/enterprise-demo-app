@@ -13,6 +13,29 @@ echo "  RG: $RG"
 echo "  PG: $PG"
 echo "  AKS: $AKS"
 
+# Create federated credential for app workload identity → PG Entra auth
+OIDC_ISSUER=$(azd env get-value AKS_OIDC_ISSUER 2>/dev/null || echo "")
+APP_ID_NAME=$(az identity list -g "$RG" --query "[?starts_with(name,'id-Zava-app')].name" -o tsv 2>/dev/null)
+if [[ -n "$OIDC_ISSUER" && -n "$APP_ID_NAME" ]]; then
+  echo "Creating federated credential for workload identity..."
+  for NS in zava default; do
+    az identity federated-credential create \
+      --name "zava-fed-$NS" \
+      --identity-name "$APP_ID_NAME" \
+      -g "$RG" \
+      --issuer "$OIDC_ISSUER" \
+      --subject "system:serviceaccount:${NS}:zava-workload-identity" \
+      --audiences "api://AzureADTokenExchange" 2>/dev/null || echo "  (federated credential for $NS may already exist)"
+  done
+fi
+
+# Attach ACR to AKS
+ACR_NAME=$(azd env get-value ACR_NAME 2>/dev/null || echo "")
+if [[ -n "$ACR_NAME" ]]; then
+  echo "Attaching ACR to AKS..."
+  az aks update -g "$RG" -n "$AKS" --attach-acr "$ACR_NAME" --output none 2>/dev/null || echo "  (ACR may already be attached)"
+fi
+
 # Seed database tables
 echo "Seeding database..."
 az postgres flexible-server execute \
