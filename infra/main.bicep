@@ -4,7 +4,7 @@ targetScope = 'subscription'
 param location string = 'swedencentral'
 
 @description('Resource group name')
-param resourceGroupName string = 'rg-enterprise-demo-swe'
+param resourceGroupName string = 'rg-enterprise-demo'
 
 @description('Unique suffix for globally unique resource names')
 param uniqueSuffix string = take(uniqueString(subscription().subscriptionId, resourceGroupName), 13)
