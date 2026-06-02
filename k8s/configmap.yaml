@@ -4,10 +4,10 @@ metadata:
   name: zava-config
   namespace: zava
 data:
-  PG_HOST: "zava-pg-3lnfkod3vrxjw.postgres.database.azure.com"
-  PG_DATABASE: "postgres"
-  PG_PORT: "5432"
-  PG_USER: "appadmin"
-  PG_PASSWORD: "DemoP@ss2026!"
+  DB_HOST: "zava-pg-3lnfkod3vrxjw.postgres.database.azure.com"
+  DB_NAME: "postgres"
+  DB_PORT: "5432"
+  DB_USER: "appadmin"
+  DB_PASSWORD: "DemoP@ss2026!"
   APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=fb0c6937-667b-4f41-a095-202665d3be85;IngestionEndpoint=https://swedencentral-0.in.applicationinsights.azure.com/;LiveEndpoint=https://swedencentral.livediagnostics.monitor.azure.com/;ApplicationId=f100d164-eec5-459a-93e0-e85c67408895"
   API_URL: "http://zava-api:3001"

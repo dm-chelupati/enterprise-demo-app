@@ -29,8 +29,10 @@ resource pgServer 'Microsoft.DBforPostgreSQL/flexibleServers@2024-08-01' = {
     version: '16'
     authConfig: {
       activeDirectoryAuth: 'Enabled'
-      passwordAuth: 'Disabled'
+      passwordAuth: 'Enabled'
     }
+    administratorLogin: 'appadmin'
+    administratorLoginPassword: 'DemoP@ss2026!'
     storage: {
       storageSizeGB: 128
     }
