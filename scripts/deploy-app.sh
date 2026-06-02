@@ -57,6 +57,21 @@ EOF
 # Deploy to AKS (private cluster — use command invoke)
 echo "Deploying to AKS (private cluster)..."
 
+# Grant deploying user AKS RBAC Cluster Admin (needed because enableAzureRBAC: true)
+DEPLOYER_OID=$(az ad signed-in-user show --query id -o tsv 2>/dev/null)
+if [[ -n "$DEPLOYER_OID" ]]; then
+  echo "  Granting AKS RBAC Cluster Admin to deploying user..."
+  AKS_ID=$(az aks show -g "$RG" -n "$AKS" --query id -o tsv)
+  az role assignment create \
+    --role "Azure Kubernetes Service RBAC Cluster Admin" \
+    --assignee-object-id "$DEPLOYER_OID" \
+    --assignee-principal-type User \
+    --scope "$AKS_ID" \
+    --output none 2>/dev/null || true
+  echo "  Waiting 30s for RBAC propagation..."
+  sleep 30
+fi
+
 # Create namespace
 az aks command invoke -g "$RG" -n "$AKS" \
   --command "kubectl create namespace zava --dry-run=client -o yaml | kubectl apply -f -" \

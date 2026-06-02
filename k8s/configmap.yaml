@@ -2,13 +2,12 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: zava-config
+  namespace: zava
 data:
-  DB_HOST: "${DB_HOST}"
-  DB_PORT: "5432"
-  DB_NAME: "zava_store"
-  DB_USER: "${APP_IDENTITY_NAME}"
-  AZURE_CLIENT_ID: "${APP_IDENTITY_CLIENT_ID}"
+  PG_HOST: "zava-pg-3lnfkod3vrxjw.postgres.database.azure.com"
+  PG_DATABASE: "postgres"
+  PG_PORT: "5432"
+  PG_USER: "appadmin"
+  PG_PASSWORD: "DemoP@ss2026!"
+  APPLICATIONINSIGHTS_CONNECTION_STRING: "InstrumentationKey=fb0c6937-667b-4f41-a095-202665d3be85;IngestionEndpoint=https://swedencentral-0.in.applicationinsights.azure.com/;LiveEndpoint=https://swedencentral.livediagnostics.monitor.azure.com/;ApplicationId=f100d164-eec5-459a-93e0-e85c67408895"
   API_URL: "http://zava-api:3001"
-  # 1 Hz (vs server.js default 30000ms): drives steady App Insights traffic so demo alerts trip without an external load generator.
-  PROBE_INTERVAL_MS: "1000"
-  AZURE_LOCATION: "${AZURE_LOCATION}"
