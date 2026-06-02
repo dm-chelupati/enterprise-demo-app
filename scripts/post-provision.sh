@@ -53,3 +53,42 @@ if [[ -z "$EXISTING" ]]; then
 fi
 
 echo "Post-provision complete"
+
+# ── GitHub BYO App: store PEM in Key Vault ──
+KV_NAME=$(azd env get-value KV_NAME 2>/dev/null || echo "")
+PEM_FILE="${GITHUB_APP_PEM_FILE:-}"
+
+if [[ -n "$KV_NAME" && -n "$PEM_FILE" ]]; then
+  if [[ -f "$PEM_FILE" ]]; then
+    echo "Storing GitHub App private key in Key Vault: $KV_NAME"
+    # Grant ourselves Secrets Officer (may already exist)
+    MY_OID=$(az ad signed-in-user show --query id -o tsv)
+    SUB=$(az account show --query id -o tsv)
+    az role assignment create \
+      --role "Key Vault Secrets Officer" \
+      --assignee-object-id "$MY_OID" \
+      --assignee-principal-type User \
+      --scope "/subscriptions/$SUB/resourceGroups/$RG/providers/Microsoft.KeyVault/vaults/$KV_NAME" \
+      --output none 2>/dev/null || true
+    echo "  Waiting 30s for RBAC propagation..."
+    sleep 30
+    az keyvault secret set \
+      --vault-name "$KV_NAME" \
+      --name sre-agent-github-app-key \
+      --file "$PEM_FILE" \
+      --output none
+    SECRET_URI=$(az keyvault secret show \
+      --vault-name "$KV_NAME" \
+      --name sre-agent-github-app-key \
+      --query id -o tsv)
+    echo "  PEM stored. Secret URI: $SECRET_URI"
+    azd env set KV_SECRET_URI "$SECRET_URI"
+  else
+    echo "WARNING: GITHUB_APP_PEM_FILE=$PEM_FILE not found — skipping KV upload"
+    echo "  Upload manually: az keyvault secret set --vault-name $KV_NAME --name sre-agent-github-app-key --file /path/to/key.pem"
+  fi
+elif [[ -n "$KV_NAME" && -z "$PEM_FILE" ]]; then
+  echo "Key Vault $KV_NAME created. To store your GitHub App PEM:"
+  echo "  export GITHUB_APP_PEM_FILE=~/Downloads/your-app.private-key.pem"
+  echo "  az keyvault secret set --vault-name $KV_NAME --name sre-agent-github-app-key --file \$GITHUB_APP_PEM_FILE"
+fi

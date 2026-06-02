@@ -12,3 +12,5 @@ hooks:
       run: bash scripts/post-provision.sh
       interactive: false
       continueOnError: true
+      env:
+        GITHUB_APP_PEM_FILE: ${GITHUB_APP_PEM_FILE}

@@ -9,6 +9,9 @@ param resourceGroupName string = 'rg-enterprise-demo-swe'
 @description('Unique suffix for globally unique resource names')
 param uniqueSuffix string = take(uniqueString(subscription().subscriptionId, resourceGroupName), 13)
 
+@description('GitHub App Client ID for BYO App auth (leave empty to skip Key Vault)')
+param githubAppClientId string = ''
+
 resource rg 'Microsoft.Resources/resourceGroups@2024-03-01' = {
   name: resourceGroupName
   location: location
@@ -80,6 +83,16 @@ module identity 'modules/identity.bicep' = {
   }
 }
 
+module keyvault 'modules/keyvault.bicep' = if (githubAppClientId != '') {
+  scope: rg
+  name: 'keyvault'
+  params: {
+    location: location
+    uniqueSuffix: uniqueSuffix
+    sreAgentPrincipalId: identity.outputs.sreAgentIdentityPrincipalId
+  }
+}
+
 output RESOURCE_GROUP string = rg.name
 output AKS_CLUSTER_NAME string = aks.outputs.clusterName
 output ACR_NAME string = acr.outputs.acrName
@@ -94,3 +107,6 @@ output AI_APP_ID string = monitoring.outputs.appInsightsAppId
 output AI_CONNECTION_STRING string = monitoring.outputs.appInsightsConnectionString
 output AMPLS_NAME string = monitoring.outputs.amplsName
 output VNET_NAME string = vnet.outputs.vnetName
+output GITHUB_APP_CLIENT_ID string = githubAppClientId
+output KV_NAME string = githubAppClientId != '' ? keyvault.outputs.keyVaultName : ''
+output KV_URI string = githubAppClientId != '' ? keyvault.outputs.keyVaultUri : ''
