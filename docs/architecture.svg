@@ -1,71 +1,64 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" font-family="Segoe UI, Arial, sans-serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 440" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif">
   <defs>
-    <marker id="a" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#555"/></marker>
-    <filter id="s"><feDropShadow dx="0" dy="1" stdDeviation="3" flood-opacity="0.2"/></filter>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><polygon points="0 0,8 3,0 6" fill="#94a3b8"/></marker>
   </defs>
 
-  <rect width="800" height="480" rx="12" fill="#0d1117"/>
+  <!-- Background -->
+  <rect width="780" height="440" rx="8" fill="#f8fafc"/>
 
-  <!-- VNet -->
-  <rect x="30" y="30" width="740" height="360" rx="16" fill="none" stroke="#30363d" stroke-width="2" stroke-dasharray="10,5"/>
-  <text x="50" y="55" fill="#58a6ff" font-size="13" font-weight="600">Private VNet</text>
+  <!-- VNet boundary -->
+  <rect x="24" y="24" width="732" height="310" rx="12" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+  <rect x="36" y="16" width="100" height="20" rx="4" fill="#f8fafc"/>
+  <text x="86" y="30" text-anchor="middle" fill="#475569" font-size="11" font-weight="600">Private VNet</text>
 
   <!-- AKS -->
-  <rect x="60" y="80" width="280" height="180" rx="12" fill="#161b22" stroke="#1f6feb" stroke-width="1.5" filter="url(#s)"/>
-  <text x="200" y="108" text-anchor="middle" fill="#58a6ff" font-size="14" font-weight="700">AKS (Private)</text>
+  <rect x="50" y="60" width="220" height="140" rx="10" fill="#eff6ff" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="160" y="86" text-anchor="middle" fill="#1e40af" font-size="14" font-weight="700">AKS</text>
+  <text x="160" y="102" text-anchor="middle" fill="#64748b" font-size="10">Private cluster</text>
 
-  <rect x="85" y="125" width="100" height="45" rx="8" fill="#1c2333" stroke="#238636" stroke-width="1.5"/>
-  <circle cx="98" cy="142" r="4" fill="#238636"/>
-  <text x="140" y="148" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600">Storefront</text>
+  <rect x="70" y="118" width="80" height="36" rx="6" fill="#fff" stroke="#3b82f6" stroke-width="1"/>
+  <circle cx="84" cy="136" r="4" fill="#22c55e"/>
+  <text x="118" y="140" text-anchor="middle" fill="#1e293b" font-size="10" font-weight="600">Storefront</text>
 
-  <rect x="215" y="125" width="100" height="45" rx="8" fill="#1c2333" stroke="#238636" stroke-width="1.5"/>
-  <circle cx="228" cy="142" r="4" fill="#238636"/>
-  <text x="265" y="148" text-anchor="middle" fill="#e6edf3" font-size="11" font-weight="600">API</text>
+  <rect x="170" y="118" width="80" height="36" rx="6" fill="#fff" stroke="#3b82f6" stroke-width="1"/>
+  <circle cx="184" cy="136" r="4" fill="#22c55e"/>
+  <text x="218" y="140" text-anchor="middle" fill="#1e293b" font-size="10" font-weight="600">API</text>
 
-  <line x1="185" y1="147" x2="215" y2="147" stroke="#555" stroke-width="1.5" marker-end="url(#a)"/>
-
-  <rect x="100" y="195" width="75" height="28" rx="6" fill="#1c2333" stroke="#6e40c9" stroke-width="1"/>
-  <text x="137" y="214" text-anchor="middle" fill="#d2a8ff" font-size="9" font-weight="600">LB :80</text>
-  <line x1="137" y1="195" x2="137" y2="170" stroke="#6e40c9" stroke-width="1" marker-end="url(#a)"/>
+  <line x1="150" y1="136" x2="170" y2="136" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr)"/>
 
   <!-- PostgreSQL -->
-  <rect x="420" y="80" width="180" height="75" rx="12" fill="#161b22" stroke="#da8e35" stroke-width="1.5" filter="url(#s)"/>
-  <text x="510" y="110" text-anchor="middle" fill="#da8e35" font-size="14" font-weight="700">PostgreSQL</text>
-  <text x="510" y="130" text-anchor="middle" fill="#8b949e" font-size="10">VNet-delegated · Private</text>
+  <rect x="340" y="95" width="170" height="70" rx="10" fill="#fefce8" stroke="#eab308" stroke-width="1.5"/>
+  <text x="425" y="125" text-anchor="middle" fill="#854d0e" font-size="14" font-weight="700">PostgreSQL</text>
+  <text x="425" y="143" text-anchor="middle" fill="#64748b" font-size="10">Private · VNet-delegated</text>
 
-  <line x1="315" y1="147" x2="420" y2="118" stroke="#da8e35" stroke-width="1.5" marker-end="url(#a)"/>
+  <!-- Arrow API → PG (straight horizontal) -->
+  <line x1="250" y1="136" x2="340" y2="132" stroke="#94a3b8" stroke-width="1.2" marker-end="url(#arr)"/>
 
   <!-- AMPLS -->
-  <rect x="420" y="200" width="330" height="130" rx="12" fill="#161b22" stroke="#f78166" stroke-width="1.5" filter="url(#s)"/>
-  <text x="585" y="228" text-anchor="middle" fill="#f78166" font-size="13" font-weight="700">AMPLS (Private Link)</text>
+  <rect x="340" y="210" width="390" height="100" rx="10" fill="#fdf4ff" stroke="#a855f7" stroke-width="1.5"/>
+  <text x="535" y="238" text-anchor="middle" fill="#6b21a8" font-size="13" font-weight="700">Azure Monitor Private Link</text>
 
-  <rect x="450" y="250" width="80" height="35" rx="6" fill="#1c2333" stroke="#bc8cff" stroke-width="1"/>
-  <text x="490" y="272" text-anchor="middle" fill="#bc8cff" font-size="10">App Insights</text>
+  <rect x="370" y="255" width="100" height="32" rx="6" fill="#fff" stroke="#a855f7" stroke-width="1"/>
+  <text x="420" y="276" text-anchor="middle" fill="#1e293b" font-size="10" font-weight="600">App Insights</text>
 
-  <rect x="560" y="250" width="60" height="35" rx="6" fill="#1c2333" stroke="#bc8cff" stroke-width="1"/>
-  <text x="590" y="272" text-anchor="middle" fill="#bc8cff" font-size="10">LAW</text>
+  <rect x="500" y="255" width="60" height="32" rx="6" fill="#fff" stroke="#a855f7" stroke-width="1"/>
+  <text x="530" y="276" text-anchor="middle" fill="#1e293b" font-size="10" font-weight="600">LAW</text>
 
-  <text x="585" y="310" text-anchor="middle" fill="#8b949e" font-size="9">Private ingestion + query</text>
+  <text x="535" y="300" text-anchor="middle" fill="#94a3b8" font-size="9">Private ingestion + query</text>
 
-  <path d="M 265 170 L 265 270 L 450 270" fill="none" stroke="#f78166" stroke-width="1" stroke-dasharray="5,3" marker-end="url(#a)"/>
+  <!-- Arrow API → AMPLS telemetry -->
+  <path d="M 210 154 L 210 270 L 370 270" fill="none" stroke="#a855f7" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
 
-  <!-- External row -->
-  <text x="50" y="425" fill="#8b949e" font-size="10" letter-spacing="0.05em">EXTERNAL</text>
+  <!-- External services row -->
+  <rect x="50" y="370" width="125" height="36" rx="8" fill="#fff" stroke="#1e293b" stroke-width="1.2"/>
+  <text x="112" y="393" text-anchor="middle" fill="#1e293b" font-size="11" font-weight="600">GitHub Enterprise</text>
 
-  <rect x="120" y="410" width="80" height="30" rx="6" fill="#1c2333" stroke="#6e40c9" stroke-width="1"/>
-  <text x="160" y="430" text-anchor="middle" fill="#d2a8ff" font-size="10">Users</text>
+  <rect x="200" y="370" width="100" height="36" rx="8" fill="#fff" stroke="#0ea5e9" stroke-width="1.2"/>
+  <text x="250" y="393" text-anchor="middle" fill="#0369a1" font-size="11" font-weight="600">ServiceNow</text>
 
-  <rect x="230" y="410" width="90" height="30" rx="6" fill="#1c2333" stroke="#f0f6fc" stroke-width="1"/>
-  <text x="275" y="430" text-anchor="middle" fill="#f0f6fc" font-size="10">GitHub</text>
+  <rect x="325" y="370" width="90" height="36" rx="8" fill="#fff" stroke="#22c55e" stroke-width="1.2"/>
+  <text x="370" y="393" text-anchor="middle" fill="#166534" font-size="11" font-weight="600">Dynatrace</text>
 
-  <rect x="345" y="410" width="95" height="30" rx="6" fill="#1c2333" stroke="#81b5f0" stroke-width="1"/>
-  <text x="392" y="430" text-anchor="middle" fill="#81b5f0" font-size="10">ServiceNow</text>
-
-  <rect x="465" y="410" width="90" height="30" rx="6" fill="#1c2333" stroke="#1aad1a" stroke-width="1"/>
-  <text x="510" y="430" text-anchor="middle" fill="#1aad1a" font-size="10">Dynatrace</text>
-
-  <rect x="580" y="410" width="60" height="30" rx="6" fill="#1c2333" stroke="#2684ff" stroke-width="1"/>
-  <text x="610" y="430" text-anchor="middle" fill="#2684ff" font-size="10">Jira</text>
-
-  <line x1="160" y1="410" x2="137" y2="260" stroke="#6e40c9" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#a)"/>
+  <rect x="440" y="370" width="60" height="36" rx="8" fill="#fff" stroke="#3b82f6" stroke-width="1.2"/>
+  <text x="470" y="393" text-anchor="middle" fill="#1d4ed8" font-size="11" font-weight="600">Jira</text>
 </svg>
