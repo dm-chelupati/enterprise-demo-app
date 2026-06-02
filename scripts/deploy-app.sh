@@ -54,6 +54,46 @@ data:
   API_URL: "http://zava-api:3001"
 EOF
 
+# Generate secret with actual App Insights connection string
+cat > k8s/secret.yaml <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: zava-secrets
+  namespace: zava
+type: Opaque
+stringData:
+  APPLICATIONINSIGHTS_CONNECTION_STRING: "$AI_CONN"
+EOF
+
+# Generate service account with actual identity client ID
+APP_CLIENT_ID=$(az identity list -g "$RG" --query "[?starts_with(name,'id-Zava-app')].clientId" -o tsv 2>/dev/null)
+cat > k8s/service-account.yaml <<EOF
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: zava-workload-identity
+  namespace: zava
+  annotations:
+    azure.workload.identity/client-id: "$APP_CLIENT_ID"
+EOF
+
+# Generate storefront service as LoadBalancer for external access
+cat > k8s/storefront-service.yaml <<EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: zava-storefront
+  namespace: zava
+spec:
+  selector:
+    app: zava-storefront
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: LoadBalancer
+EOF
+
 # Deploy to AKS (private cluster — use command invoke)
 echo "Deploying to AKS (private cluster)..."
 
