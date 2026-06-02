@@ -1,9 +1,11 @@
 #!/bin/bash
 # Deploy the Zava storefront + API to AKS
-# Requires: Docker running, az login done, azd env values set
+# Uses az acr build (cloud build — no local Docker needed)
 set -eo pipefail
 
-cd ~/enterprise-demo-app
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+APP_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$APP_DIR"
 
 RG=$(azd env get-value RESOURCE_GROUP)
 AKS=$(azd env get-value AKS_CLUSTER_NAME)
@@ -13,48 +15,74 @@ PG_FQDN=$(azd env get-value PG_FQDN)
 PG_NAME=$(azd env get-value PG_SERVER_NAME)
 AI_CONN=$(azd env get-value AI_CONNECTION_STRING)
 
-echo "RG=$RG  AKS=$AKS  ACR=$ACR  PG=$PG_FQDN"
+echo "Deploying Zava app to AKS"
+echo "  RG=$RG  AKS=$AKS  ACR=$ACR  PG=$PG_FQDN"
 
-# Login to ACR
-az acr login -n $ACR_NAME
+# Build images in the cloud (no Docker required)
+echo "Building API image (cloud build)..."
+az acr build -r "$ACR_NAME" -t zava-api:latest src/zava-api/ --no-logs 2>/dev/null || \
+  az acr build -r "$ACR_NAME" -t zava-api:latest src/zava-api/
 
-# Build and push images
-echo "Building API image..."
-docker build -t $ACR/zava-api:latest src/zava-api/
-docker push $ACR/zava-api:latest
+echo "Building storefront image (cloud build)..."
+az acr build -r "$ACR_NAME" -t zava-storefront:latest src/storefront/ --no-logs 2>/dev/null || \
+  az acr build -r "$ACR_NAME" -t zava-storefront:latest src/storefront/
 
-echo "Building storefront image..."
-docker build -t $ACR/zava-storefront:latest src/storefront/
-docker push $ACR/zava-storefront:latest
+# Generate k8s manifests with actual values
+echo "Generating k8s manifests..."
 
-# Update K8s manifests with actual values
+# Reset any previous sed replacements in tracked files
+git checkout -- k8s/api-deployment.yaml k8s/storefront-deployment.yaml 2>/dev/null || true
+
+# Apply ACR substitution
 sed -i '' "s|__ACR__|$ACR|g" k8s/api-deployment.yaml k8s/storefront-deployment.yaml 2>/dev/null || \
 sed -i "s|__ACR__|$ACR|g" k8s/api-deployment.yaml k8s/storefront-deployment.yaml
 
-# Update configmap with PG connection + App Insights
+# Generate configmap
 cat > k8s/configmap.yaml <<EOF
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: zava-config
-  namespace: default
+  namespace: zava
 data:
   PG_HOST: "$PG_FQDN"
   PG_DATABASE: "postgres"
   PG_PORT: "5432"
+  PG_USER: "appadmin"
+  PG_PASSWORD: "DemoP@ss2026!"
   APPLICATIONINSIGHTS_CONNECTION_STRING: "$AI_CONN"
   API_URL: "http://zava-api:3001"
 EOF
 
 # Deploy to AKS (private cluster — use command invoke)
-echo "Deploying to AKS..."
-for f in k8s/configmap.yaml k8s/service-account.yaml k8s/api-deployment.yaml k8s/api-service.yaml k8s/storefront-deployment.yaml k8s/storefront-service.yaml k8s/ingress.yaml; do
-  echo "  Applying $f..."
-  az aks command invoke -g $RG -n $AKS \
-    --command "kubectl apply -f -" \
-    --file "$f" --no-wait 2>/dev/null || echo "  Failed: $f"
+echo "Deploying to AKS (private cluster)..."
+
+# Create namespace
+az aks command invoke -g "$RG" -n "$AKS" \
+  --command "kubectl create namespace zava --dry-run=client -o yaml | kubectl apply -f -" \
+  2>/dev/null || true
+
+# Apply manifests one by one
+for f in k8s/configmap.yaml k8s/service-account.yaml k8s/secret.yaml k8s/api-deployment.yaml k8s/api-service.yaml k8s/storefront-deployment.yaml k8s/storefront-service.yaml; do
+  if [[ -f "$f" ]]; then
+    echo "  Applying $f..."
+    az aks command invoke -g "$RG" -n "$AKS" \
+      --command "kubectl apply -f $(basename $f) -n zava" \
+      --file "$f" 2>/dev/null || echo "  WARN: $f may need manual apply"
+  fi
 done
 
+# Wait for pods
+echo "  Waiting for pods..."
+sleep 10
+az aks command invoke -g "$RG" -n "$AKS" \
+  --command "kubectl get pods -n zava -o wide" 2>/dev/null || true
+
+# Get service IPs
 echo ""
-echo "Deployed. Get the ingress IP with:"
-echo "  az aks command invoke -g $RG -n $AKS --command 'kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath={.status.loadBalancer.ingress[0].ip}'"
+echo "Getting service endpoints..."
+az aks command invoke -g "$RG" -n "$AKS" \
+  --command "kubectl get svc -n zava" 2>/dev/null || true
+
+echo ""
+echo "App deployment complete. If services show <pending>, wait 1-2 min for LoadBalancer IP."

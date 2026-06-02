@@ -9,7 +9,7 @@ hooks:
   postprovision:
     posix:
       shell: sh
-      run: bash scripts/post-provision.sh
+      run: bash scripts/post-provision.sh && bash scripts/deploy-app.sh
       interactive: false
       continueOnError: true
       env:
