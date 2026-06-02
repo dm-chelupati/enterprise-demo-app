@@ -1,0 +1,1335 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_generator": {
+      "name": "bicep",
+      "version": "0.40.2.10011",
+      "templateHash": "17680438391017660318"
+    }
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "metadata": {
+        "description": "Azure region for all resources"
+      }
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "defaultValue": "rg-enterprise-demo",
+      "metadata": {
+        "description": "Resource group name"
+      }
+    },
+    "uniqueSuffix": {
+      "type": "string",
+      "defaultValue": "[take(uniqueString(subscription().subscriptionId, parameters('resourceGroupName')), 13)]",
+      "metadata": {
+        "description": "Unique suffix for globally unique resource names"
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2024-03-01",
+      "name": "[parameters('resourceGroupName')]",
+      "location": "[parameters('location')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "vnet",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "uniqueSuffix": {
+            "value": "[parameters('uniqueSuffix')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.40.2.10011",
+              "templateHash": "3131674606797609253"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure region"
+              }
+            },
+            "uniqueSuffix": {
+              "type": "string",
+              "metadata": {
+                "description": "Unique suffix for resource names"
+              }
+            }
+          },
+          "variables": {
+            "vnetName": "[format('vnet-enterprise-{0}', parameters('uniqueSuffix'))]",
+            "nsgName": "[format('nsg-aks-{0}', parameters('uniqueSuffix'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.Network/networkSecurityGroups",
+              "apiVersion": "2024-01-01",
+              "name": "[variables('nsgName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "securityRules": [
+                  {
+                    "name": "allow-all-outbound",
+                    "properties": {
+                      "priority": 1000,
+                      "direction": "Outbound",
+                      "access": "Allow",
+                      "protocol": "*",
+                      "sourceAddressPrefix": "*",
+                      "sourcePortRange": "*",
+                      "destinationAddressPrefix": "*",
+                      "destinationPortRange": "*"
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "type": "Microsoft.Network/virtualNetworks",
+              "apiVersion": "2024-01-01",
+              "name": "[variables('vnetName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "addressSpace": {
+                  "addressPrefixes": [
+                    "10.0.0.0/8"
+                  ]
+                },
+                "subnets": [
+                  {
+                    "name": "aks-subnet",
+                    "properties": {
+                      "addressPrefix": "10.0.0.0/16",
+                      "networkSecurityGroup": {
+                        "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+                      },
+                      "serviceEndpoints": [
+                        {
+                          "service": "Microsoft.Storage"
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "db-subnet",
+                    "properties": {
+                      "addressPrefix": "10.1.0.0/24",
+                      "delegations": [
+                        {
+                          "name": "postgres-delegation",
+                          "properties": {
+                            "serviceName": "Microsoft.DBforPostgreSQL/flexibleServers"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "name": "ampls-subnet",
+                    "properties": {
+                      "addressPrefix": "10.2.0.0/24",
+                      "privateEndpointNetworkPolicies": "Disabled"
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/networkSecurityGroups', variables('nsgName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones",
+              "apiVersion": "2024-06-01",
+              "name": "[format('{0}.private.postgres.database.azure.com', parameters('uniqueSuffix'))]",
+              "location": "global"
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+              "apiVersion": "2024-06-01",
+              "name": "[format('{0}/{1}', format('{0}.private.postgres.database.azure.com', parameters('uniqueSuffix')), 'vnet-link-pg')]",
+              "location": "global",
+              "properties": {
+                "virtualNetwork": {
+                  "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+                },
+                "registrationEnabled": false
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', format('{0}.private.postgres.database.azure.com', parameters('uniqueSuffix')))]",
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones",
+              "apiVersion": "2024-06-01",
+              "name": "privatelink.monitor.azure.com",
+              "location": "global"
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones",
+              "apiVersion": "2024-06-01",
+              "name": "privatelink.oms.opinsights.azure.com",
+              "location": "global"
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones",
+              "apiVersion": "2024-06-01",
+              "name": "privatelink.ods.opinsights.azure.com",
+              "location": "global"
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones",
+              "apiVersion": "2024-06-01",
+              "name": "privatelink.agentsvc.azure-automation.net",
+              "location": "global"
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+              "apiVersion": "2024-06-01",
+              "name": "[format('{0}/{1}', 'privatelink.monitor.azure.com', 'vnet-link-monitor')]",
+              "location": "global",
+              "properties": {
+                "virtualNetwork": {
+                  "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+                },
+                "registrationEnabled": false
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.monitor.azure.com')]",
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+              "apiVersion": "2024-06-01",
+              "name": "[format('{0}/{1}', 'privatelink.oms.opinsights.azure.com', 'vnet-link-oms')]",
+              "location": "global",
+              "properties": {
+                "virtualNetwork": {
+                  "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+                },
+                "registrationEnabled": false
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.oms.opinsights.azure.com')]",
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+              "apiVersion": "2024-06-01",
+              "name": "[format('{0}/{1}', 'privatelink.ods.opinsights.azure.com', 'vnet-link-ods')]",
+              "location": "global",
+              "properties": {
+                "virtualNetwork": {
+                  "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+                },
+                "registrationEnabled": false
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.ods.opinsights.azure.com')]",
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/privateDnsZones/virtualNetworkLinks",
+              "apiVersion": "2024-06-01",
+              "name": "[format('{0}/{1}', 'privatelink.agentsvc.azure-automation.net', 'vnet-link-agentsvc')]",
+              "location": "global",
+              "properties": {
+                "virtualNetwork": {
+                  "id": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+                },
+                "registrationEnabled": false
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.agentsvc.azure-automation.net')]",
+                "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "vnetName": {
+              "type": "string",
+              "value": "[variables('vnetName')]"
+            },
+            "vnetId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]"
+            },
+            "aksSubnetId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2024-01-01').subnets[0].id]"
+            },
+            "dbSubnetId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2024-01-01').subnets[1].id]"
+            },
+            "amplsSubnetId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Network/virtualNetworks', variables('vnetName')), '2024-01-01').subnets[2].id]"
+            },
+            "nsgName": {
+              "type": "string",
+              "value": "[variables('nsgName')]"
+            },
+            "privateDnsZonePgId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/privateDnsZones', format('{0}.private.postgres.database.azure.com', parameters('uniqueSuffix')))]"
+            },
+            "privateDnsZoneMonitorId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.monitor.azure.com')]"
+            },
+            "privateDnsZoneOmsId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.oms.opinsights.azure.com')]"
+            },
+            "privateDnsZoneOdsId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.ods.opinsights.azure.com')]"
+            },
+            "privateDnsZoneAgentsvcId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.agentsvc.azure-automation.net')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "acr",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "uniqueSuffix": {
+            "value": "[parameters('uniqueSuffix')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.40.2.10011",
+              "templateHash": "10144567526905001731"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure region for the container registry."
+              }
+            },
+            "uniqueSuffix": {
+              "type": "string",
+              "metadata": {
+                "description": "Unique suffix for globally unique resource names."
+              }
+            }
+          },
+          "variables": {
+            "acrName": "[format('acrzava{0}', parameters('uniqueSuffix'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ContainerRegistry/registries",
+              "apiVersion": "2023-07-01",
+              "name": "[variables('acrName')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Basic"
+              },
+              "properties": {
+                "adminUserEnabled": false
+              }
+            }
+          ],
+          "outputs": {
+            "acrName": {
+              "type": "string",
+              "value": "[variables('acrName')]"
+            },
+            "acrLoginServer": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ContainerRegistry/registries', variables('acrName')), '2023-07-01').loginServer]"
+            },
+            "acrId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.ContainerRegistry/registries', variables('acrName'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "monitoring",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "uniqueSuffix": {
+            "value": "[parameters('uniqueSuffix')]"
+          },
+          "amplsSubnetId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vnet'), '2025-04-01').outputs.amplsSubnetId.value]"
+          },
+          "privateDnsZoneMonitorId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vnet'), '2025-04-01').outputs.privateDnsZoneMonitorId.value]"
+          },
+          "privateDnsZoneOmsId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vnet'), '2025-04-01').outputs.privateDnsZoneOmsId.value]"
+          },
+          "privateDnsZoneOdsId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vnet'), '2025-04-01').outputs.privateDnsZoneOdsId.value]"
+          },
+          "privateDnsZoneAgentsvcId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vnet'), '2025-04-01').outputs.privateDnsZoneAgentsvcId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.40.2.10011",
+              "templateHash": "17108034369628151486"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure region"
+              }
+            },
+            "uniqueSuffix": {
+              "type": "string",
+              "metadata": {
+                "description": "Unique suffix"
+              }
+            },
+            "amplsSubnetId": {
+              "type": "string",
+              "metadata": {
+                "description": "Subnet ID for AMPLS private endpoint"
+              }
+            },
+            "privateDnsZoneMonitorId": {
+              "type": "string",
+              "metadata": {
+                "description": "Private DNS zone IDs for AMPLS"
+              }
+            },
+            "privateDnsZoneOmsId": {
+              "type": "string"
+            },
+            "privateDnsZoneOdsId": {
+              "type": "string"
+            },
+            "privateDnsZoneAgentsvcId": {
+              "type": "string"
+            }
+          },
+          "variables": {
+            "lawName": "[format('law-{0}', parameters('uniqueSuffix'))]",
+            "aiName": "[format('ai-{0}', parameters('uniqueSuffix'))]",
+            "amplsName": "[format('ampls-{0}', parameters('uniqueSuffix'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.OperationalInsights/workspaces",
+              "apiVersion": "2023-09-01",
+              "name": "[variables('lawName')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "sku": {
+                  "name": "PerGB2018"
+                },
+                "retentionInDays": 30,
+                "publicNetworkAccessForIngestion": "Disabled",
+                "publicNetworkAccessForQuery": "Disabled"
+              }
+            },
+            {
+              "type": "Microsoft.Insights/components",
+              "apiVersion": "2020-02-02",
+              "name": "[variables('aiName')]",
+              "location": "[parameters('location')]",
+              "kind": "web",
+              "properties": {
+                "Application_Type": "web",
+                "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]",
+                "publicNetworkAccessForIngestion": "Disabled",
+                "publicNetworkAccessForQuery": "Disabled"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]"
+              ]
+            },
+            {
+              "type": "microsoft.insights/privateLinkScopes",
+              "apiVersion": "2021-07-01-preview",
+              "name": "[variables('amplsName')]",
+              "location": "global",
+              "properties": {
+                "accessModeSettings": {
+                  "ingestionAccessMode": "PrivateOnly",
+                  "queryAccessMode": "PrivateOnly"
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Insights/privateLinkScopes/scopedResources",
+              "apiVersion": "2021-07-01-preview",
+              "name": "[format('{0}/{1}', variables('amplsName'), 'law-link')]",
+              "properties": {
+                "linkedResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]"
+              },
+              "dependsOn": [
+                "[resourceId('microsoft.insights/privateLinkScopes', variables('amplsName'))]",
+                "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Insights/privateLinkScopes/scopedResources",
+              "apiVersion": "2021-07-01-preview",
+              "name": "[format('{0}/{1}', variables('amplsName'), 'ai-link')]",
+              "properties": {
+                "linkedResourceId": "[resourceId('Microsoft.Insights/components', variables('aiName'))]"
+              },
+              "dependsOn": [
+                "[resourceId('microsoft.insights/privateLinkScopes', variables('amplsName'))]",
+                "[resourceId('Microsoft.Insights/components', variables('aiName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/privateEndpoints",
+              "apiVersion": "2024-01-01",
+              "name": "[format('pe-{0}', variables('amplsName'))]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "subnet": {
+                  "id": "[parameters('amplsSubnetId')]"
+                },
+                "privateLinkServiceConnections": [
+                  {
+                    "name": "ampls-connection",
+                    "properties": {
+                      "privateLinkServiceId": "[resourceId('microsoft.insights/privateLinkScopes', variables('amplsName'))]",
+                      "groupIds": [
+                        "azuremonitor"
+                      ]
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('microsoft.insights/privateLinkScopes', variables('amplsName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Network/privateEndpoints/privateDnsZoneGroups",
+              "apiVersion": "2024-01-01",
+              "name": "[format('{0}/{1}', format('pe-{0}', variables('amplsName')), 'ampls-dns')]",
+              "properties": {
+                "privateDnsZoneConfigs": [
+                  {
+                    "name": "monitor",
+                    "properties": {
+                      "privateDnsZoneId": "[parameters('privateDnsZoneMonitorId')]"
+                    }
+                  },
+                  {
+                    "name": "oms",
+                    "properties": {
+                      "privateDnsZoneId": "[parameters('privateDnsZoneOmsId')]"
+                    }
+                  },
+                  {
+                    "name": "ods",
+                    "properties": {
+                      "privateDnsZoneId": "[parameters('privateDnsZoneOdsId')]"
+                    }
+                  },
+                  {
+                    "name": "agentsvc",
+                    "properties": {
+                      "privateDnsZoneId": "[parameters('privateDnsZoneAgentsvcId')]"
+                    }
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Network/privateEndpoints', format('pe-{0}', variables('amplsName')))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Insights/metricAlerts",
+              "apiVersion": "2018-03-01",
+              "name": "[format('app-5xx-errors-{0}', parameters('uniqueSuffix'))]",
+              "location": "global",
+              "properties": {
+                "description": "App returning 5xx errors",
+                "severity": 2,
+                "enabled": true,
+                "scopes": [
+                  "[resourceId('Microsoft.Insights/components', variables('aiName'))]"
+                ],
+                "evaluationFrequency": "PT1M",
+                "windowSize": "PT5M",
+                "autoMitigate": true,
+                "criteria": {
+                  "odata.type": "Microsoft.Azure.Monitor.SingleResourceMultipleMetricCriteria",
+                  "allOf": [
+                    {
+                      "name": "failed-requests",
+                      "metricName": "requests/failed",
+                      "metricNamespace": "microsoft.insights/components",
+                      "operator": "GreaterThan",
+                      "threshold": 5,
+                      "timeAggregation": "Count",
+                      "criterionType": "StaticThresholdCriterion"
+                    }
+                  ]
+                }
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.Insights/components', variables('aiName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Insights/diagnosticSettings",
+              "apiVersion": "2021-05-01-preview",
+              "scope": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]",
+              "name": "law-diagnostics",
+              "properties": {
+                "workspaceId": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]",
+                "logs": [
+                  {
+                    "categoryGroup": "allLogs",
+                    "enabled": true
+                  }
+                ],
+                "metrics": [
+                  {
+                    "category": "AllMetrics",
+                    "enabled": true
+                  }
+                ]
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "logAnalyticsWorkspaceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName'))]"
+            },
+            "logAnalyticsWorkspaceName": {
+              "type": "string",
+              "value": "[variables('lawName')]"
+            },
+            "logAnalyticsWorkspaceCustomerId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.OperationalInsights/workspaces', variables('lawName')), '2023-09-01').customerId]"
+            },
+            "appInsightsId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.Insights/components', variables('aiName'))]"
+            },
+            "appInsightsAppId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('aiName')), '2020-02-02').AppId]"
+            },
+            "appInsightsConnectionString": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.Insights/components', variables('aiName')), '2020-02-02').ConnectionString]"
+            },
+            "amplsId": {
+              "type": "string",
+              "value": "[resourceId('microsoft.insights/privateLinkScopes', variables('amplsName'))]"
+            },
+            "amplsName": {
+              "type": "string",
+              "value": "[variables('amplsName')]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vnet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "postgresql",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "uniqueSuffix": {
+            "value": "[parameters('uniqueSuffix')]"
+          },
+          "subnetId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vnet'), '2025-04-01').outputs.dbSubnetId.value]"
+          },
+          "privateDnsZoneId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vnet'), '2025-04-01').outputs.privateDnsZonePgId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.40.2.10011",
+              "templateHash": "1562788968384917908"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure region for the PostgreSQL flexible server."
+              }
+            },
+            "uniqueSuffix": {
+              "type": "string",
+              "metadata": {
+                "description": "Unique suffix for the server name."
+              }
+            },
+            "subnetId": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the delegated subnet for the flexible server."
+              }
+            },
+            "privateDnsZoneId": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the private DNS zone for the flexible server."
+              }
+            }
+          },
+          "variables": {
+            "serverName": "[format('zava-pg-{0}', parameters('uniqueSuffix'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.DBforPostgreSQL/flexibleServers",
+              "apiVersion": "2024-08-01",
+              "name": "[variables('serverName')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard_D2ds_v5",
+                "tier": "GeneralPurpose"
+              },
+              "properties": {
+                "version": "16",
+                "authConfig": {
+                  "activeDirectoryAuth": "Enabled",
+                  "passwordAuth": "Disabled"
+                },
+                "storage": {
+                  "storageSizeGB": 128
+                },
+                "backup": {
+                  "backupRetentionDays": 7,
+                  "geoRedundantBackup": "Disabled"
+                },
+                "network": {
+                  "delegatedSubnetResourceId": "[parameters('subnetId')]",
+                  "privateDnsZoneArmResourceId": "[parameters('privateDnsZoneId')]"
+                },
+                "highAvailability": {
+                  "mode": "Disabled"
+                }
+              }
+            },
+            {
+              "type": "Microsoft.DBforPostgreSQL/flexibleServers/databases",
+              "apiVersion": "2024-08-01",
+              "name": "[format('{0}/{1}', variables('serverName'), 'zava_store')]",
+              "properties": {
+                "charset": "UTF8",
+                "collation": "en_US.utf8"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('serverName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+              "apiVersion": "2024-08-01",
+              "name": "[format('{0}/{1}', variables('serverName'), 'pg_stat_statements.track')]",
+              "properties": {
+                "value": "all",
+                "source": "user-override"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('serverName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+              "apiVersion": "2024-08-01",
+              "name": "[format('{0}/{1}', variables('serverName'), 'pg_qs.query_capture_mode')]",
+              "properties": {
+                "value": "ALL",
+                "source": "user-override"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('serverName'))]",
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers/configurations', variables('serverName'), 'pg_stat_statements.track')]"
+              ]
+            },
+            {
+              "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+              "apiVersion": "2024-08-01",
+              "name": "[format('{0}/{1}', variables('serverName'), 'pg_qs.retention_period_in_days')]",
+              "properties": {
+                "value": "7",
+                "source": "user-override"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers/configurations', variables('serverName'), 'pg_qs.query_capture_mode')]",
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('serverName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+              "apiVersion": "2024-08-01",
+              "name": "[format('{0}/{1}', variables('serverName'), 'pgms_wait_sampling.query_capture_mode')]",
+              "properties": {
+                "value": "ALL",
+                "source": "user-override"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers/configurations', variables('serverName'), 'pg_qs.retention_period_in_days')]",
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('serverName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+              "apiVersion": "2024-08-01",
+              "name": "[format('{0}/{1}', variables('serverName'), 'track_io_timing')]",
+              "properties": {
+                "value": "on",
+                "source": "user-override"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers/configurations', variables('serverName'), 'pgms_wait_sampling.query_capture_mode')]",
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('serverName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.DBforPostgreSQL/flexibleServers/configurations",
+              "apiVersion": "2024-08-01",
+              "name": "[format('{0}/{1}', variables('serverName'), 'random_page_cost')]",
+              "properties": {
+                "value": "1.1",
+                "source": "user-override"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('serverName'))]",
+                "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers/configurations', variables('serverName'), 'track_io_timing')]"
+              ]
+            }
+          ],
+          "outputs": {
+            "serverName": {
+              "type": "string",
+              "value": "[variables('serverName')]"
+            },
+            "fqdn": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('serverName')), '2024-08-01').fullyQualifiedDomainName]"
+            },
+            "serverResourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.DBforPostgreSQL/flexibleServers', variables('serverName'))]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vnet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "aks",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "uniqueSuffix": {
+            "value": "[parameters('uniqueSuffix')]"
+          },
+          "subnetId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vnet'), '2025-04-01').outputs.aksSubnetId.value]"
+          },
+          "logAnalyticsWorkspaceId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'monitoring'), '2025-04-01').outputs.logAnalyticsWorkspaceId.value]"
+          },
+          "acrId": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'acr'), '2025-04-01').outputs.acrId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.40.2.10011",
+              "templateHash": "12662506274179408531"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure region for the AKS cluster."
+              }
+            },
+            "uniqueSuffix": {
+              "type": "string",
+              "metadata": {
+                "description": "Unique suffix for globally unique resource names."
+              }
+            },
+            "subnetId": {
+              "type": "string",
+              "metadata": {
+                "description": "Resource ID of the AKS subnet."
+              }
+            },
+            "logAnalyticsWorkspaceId": {
+              "type": "string",
+              "metadata": {
+                "description": "Log Analytics workspace resource ID for Container Insights (omsagent addon)."
+              }
+            },
+            "acrId": {
+              "type": "string",
+              "metadata": {
+                "description": "Container registry resource ID — used to grant AKS kubelet AcrPull."
+              }
+            }
+          },
+          "variables": {
+            "clusterName": "[format('aks-Zava-{0}', parameters('uniqueSuffix'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ContainerService/managedClusters",
+              "apiVersion": "2024-09-01",
+              "name": "[variables('clusterName')]",
+              "location": "[parameters('location')]",
+              "identity": {
+                "type": "SystemAssigned"
+              },
+              "properties": {
+                "dnsPrefix": "[format('Zava-{0}', parameters('uniqueSuffix'))]",
+                "aadProfile": {
+                  "managed": true,
+                  "enableAzureRBAC": true
+                },
+                "networkProfile": {
+                  "networkPlugin": "azure",
+                  "networkPolicy": "azure",
+                  "serviceCidr": "10.2.0.0/16",
+                  "dnsServiceIP": "10.2.0.10"
+                },
+                "apiServerAccessProfile": {
+                  "enablePrivateCluster": true,
+                  "privateDNSZone": "system",
+                  "enablePrivateClusterPublicFQDN": false
+                },
+                "oidcIssuerProfile": {
+                  "enabled": true
+                },
+                "securityProfile": {
+                  "workloadIdentity": {
+                    "enabled": true
+                  }
+                },
+                "agentPoolProfiles": [
+                  {
+                    "name": "apppool2",
+                    "count": 3,
+                    "vmSize": "Standard_D2ds_v5",
+                    "osType": "Linux",
+                    "mode": "System",
+                    "vnetSubnetID": "[parameters('subnetId')]",
+                    "enableAutoScaling": false
+                  }
+                ],
+                "addonProfiles": {
+                  "omsagent": {
+                    "enabled": true,
+                    "config": {
+                      "logAnalyticsWorkspaceResourceID": "[parameters('logAnalyticsWorkspaceId')]"
+                    }
+                  },
+                  "azurepolicy": {
+                    "enabled": true
+                  }
+                }
+              }
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "name": "[guid(resourceId('Microsoft.ContainerService/managedClusters', variables('clusterName')), parameters('acrId'), 'acrpull')]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '7f951dda-4ed3-4680-a7ca-43fe172d538d')]",
+                "principalId": "[reference(resourceId('Microsoft.ContainerService/managedClusters', variables('clusterName')), '2024-09-01').identityProfile.kubeletidentity.objectId]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ContainerService/managedClusters', variables('clusterName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "clusterName": {
+              "type": "string",
+              "value": "[variables('clusterName')]"
+            },
+            "clusterResourceId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.ContainerService/managedClusters', variables('clusterName'))]"
+            },
+            "clusterPrivateFqdn": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ContainerService/managedClusters', variables('clusterName')), '2024-09-01').privateFQDN]"
+            },
+            "kubeletPrincipalId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ContainerService/managedClusters', variables('clusterName')), '2024-09-01').identityProfile.kubeletidentity.objectId]"
+            },
+            "oidcIssuerUrl": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ContainerService/managedClusters', variables('clusterName')), '2024-09-01').oidcIssuerProfile.issuerURL]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'acr')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'monitoring')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vnet')]"
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2025-04-01",
+      "name": "identity",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "properties": {
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "mode": "Incremental",
+        "parameters": {
+          "location": {
+            "value": "[parameters('location')]"
+          },
+          "uniqueSuffix": {
+            "value": "[parameters('uniqueSuffix')]"
+          },
+          "aksClusterName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'aks'), '2025-04-01').outputs.clusterName.value]"
+          },
+          "appInsightsName": {
+            "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'monitoring'), '2025-04-01').outputs.appInsightsAppId.value]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "metadata": {
+            "_generator": {
+              "name": "bicep",
+              "version": "0.40.2.10011",
+              "templateHash": "12137914684082267464"
+            }
+          },
+          "parameters": {
+            "location": {
+              "type": "string",
+              "metadata": {
+                "description": "Azure region for the managed identities."
+              }
+            },
+            "uniqueSuffix": {
+              "type": "string",
+              "metadata": {
+                "description": "Unique suffix for identity resource names."
+              }
+            },
+            "aksClusterName": {
+              "type": "string",
+              "metadata": {
+                "description": "AKS cluster name — used to grant SRE Agent K8s-level RBAC"
+              }
+            },
+            "appInsightsName": {
+              "type": "string",
+              "metadata": {
+                "description": "Application Insights component name"
+              }
+            }
+          },
+          "variables": {
+            "appIdentityName": "[format('id-Zava-app-{0}', parameters('uniqueSuffix'))]",
+            "sreIdentityName": "[format('id-sre-agent-{0}', parameters('uniqueSuffix'))]"
+          },
+          "resources": [
+            {
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+              "apiVersion": "2023-01-31",
+              "name": "[variables('appIdentityName')]",
+              "location": "[parameters('location')]"
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[resourceId('Microsoft.Insights/components', parameters('appInsightsName'))]",
+              "name": "[guid(resourceId('Microsoft.Insights/components', parameters('appInsightsName')), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('appIdentityName')), 'metrics-publisher')]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '3913510d-42f4-4e42-8a64-420c390055eb')]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('appIdentityName')), '2023-01-31').principalId]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('appIdentityName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+              "apiVersion": "2023-01-31",
+              "name": "[variables('sreIdentityName')]",
+              "location": "[parameters('location')]"
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName')), 'reader')]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'acdd72a7-3385-48ef-bd42-f606fba81ae7')]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName')), '2023-01-31').principalId]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName')), 'monreader')]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '43d0d8ad-25c7-4714-9337-8ba259a9fe05')]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName')), '2023-01-31').principalId]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "name": "[guid(resourceGroup().id, resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName')), 'contributor')]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName')), '2023-01-31').principalId]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName'))]"
+              ]
+            },
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2022-04-01",
+              "scope": "[resourceId('Microsoft.ContainerService/managedClusters', parameters('aksClusterName'))]",
+              "name": "[guid(resourceId('Microsoft.ContainerService/managedClusters', parameters('aksClusterName')), resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName')), 'aksrbacadmin')]",
+              "properties": {
+                "roleDefinitionId": "[subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'b1ff04bb-8a4e-4dc4-8eb5-8693973ce19b')]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName')), '2023-01-31').principalId]",
+                "principalType": "ServicePrincipal"
+              },
+              "dependsOn": [
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName'))]"
+              ]
+            }
+          ],
+          "outputs": {
+            "sreAgentIdentityName": {
+              "type": "string",
+              "value": "[variables('sreIdentityName')]"
+            },
+            "sreAgentIdentityPrincipalId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName')), '2023-01-31').principalId]"
+            },
+            "sreAgentIdentityId": {
+              "type": "string",
+              "value": "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('sreIdentityName'))]"
+            },
+            "appIdentityName": {
+              "type": "string",
+              "value": "[variables('appIdentityName')]"
+            },
+            "appIdentityClientId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('appIdentityName')), '2023-01-31').clientId]"
+            },
+            "appIdentityPrincipalId": {
+              "type": "string",
+              "value": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('appIdentityName')), '2023-01-31').principalId]"
+            }
+          }
+        }
+      },
+      "dependsOn": [
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'aks')]",
+        "[extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'monitoring')]",
+        "[subscriptionResourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+      ]
+    }
+  ],
+  "outputs": {
+    "RESOURCE_GROUP": {
+      "type": "string",
+      "value": "[parameters('resourceGroupName')]"
+    },
+    "AKS_CLUSTER_NAME": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'aks'), '2025-04-01').outputs.clusterName.value]"
+    },
+    "ACR_NAME": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'acr'), '2025-04-01').outputs.acrName.value]"
+    },
+    "ACR_LOGIN_SERVER": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'acr'), '2025-04-01').outputs.acrLoginServer.value]"
+    },
+    "PG_SERVER_NAME": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'postgresql'), '2025-04-01').outputs.serverName.value]"
+    },
+    "PG_FQDN": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'postgresql'), '2025-04-01').outputs.fqdn.value]"
+    },
+    "LAW_ID": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'monitoring'), '2025-04-01').outputs.logAnalyticsWorkspaceId.value]"
+    },
+    "LAW_NAME": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'monitoring'), '2025-04-01').outputs.logAnalyticsWorkspaceName.value]"
+    },
+    "LAW_WORKSPACE_ID": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'monitoring'), '2025-04-01').outputs.logAnalyticsWorkspaceCustomerId.value]"
+    },
+    "AI_ID": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'monitoring'), '2025-04-01').outputs.appInsightsId.value]"
+    },
+    "AI_APP_ID": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'monitoring'), '2025-04-01').outputs.appInsightsAppId.value]"
+    },
+    "AI_CONNECTION_STRING": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'monitoring'), '2025-04-01').outputs.appInsightsConnectionString.value]"
+    },
+    "AMPLS_NAME": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'monitoring'), '2025-04-01').outputs.amplsName.value]"
+    },
+    "VNET_NAME": {
+      "type": "string",
+      "value": "[reference(extensionResourceId(format('/subscriptions/{0}/resourceGroups/{1}', subscription().subscriptionId, parameters('resourceGroupName')), 'Microsoft.Resources/deployments', 'vnet'), '2025-04-01').outputs.vnetName.value]"
+    }
+  }
+}

@@ -43,8 +43,6 @@ module monitoring 'modules/monitoring.bicep' = {
     privateDnsZoneOmsId: vnet.outputs.privateDnsZoneOmsId
     privateDnsZoneOdsId: vnet.outputs.privateDnsZoneOdsId
     privateDnsZoneAgentsvcId: vnet.outputs.privateDnsZoneAgentsvcId
-    postgresServerName: postgresql.outputs.serverName
-    resourceGroupId: rg.id
   }
 }
 
@@ -78,7 +76,7 @@ module identity 'modules/identity.bicep' = {
     location: location
     uniqueSuffix: uniqueSuffix
     aksClusterName: aks.outputs.clusterName
-    postgresServerName: postgresql.outputs.serverName
+    appInsightsName: monitoring.outputs.appInsightsAppId
   }
 }
 

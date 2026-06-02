@@ -13,12 +13,6 @@ param privateDnsZoneOmsId string
 param privateDnsZoneOdsId string
 param privateDnsZoneAgentsvcId string
 
-@description('PostgreSQL server name for alert rules')
-param postgresServerName string
-
-@description('Resource group ID')
-param resourceGroupId string
-
 var lawName = 'law-${uniqueSuffix}'
 var aiName = 'ai-${uniqueSuffix}'
 var amplsName = 'ampls-${uniqueSuffix}'
@@ -158,10 +152,16 @@ resource diagSettings 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview'
   properties: {
     workspaceId: law.id
     logs: [
-      { categoryGroup: 'allLogs'; enabled: true }
+      {
+        categoryGroup: 'allLogs'
+        enabled: true
+      }
     ]
     metrics: [
-      { category: 'AllMetrics'; enabled: true }
+      {
+        category: 'AllMetrics'
+        enabled: true
+      }
     ]
   }
 }

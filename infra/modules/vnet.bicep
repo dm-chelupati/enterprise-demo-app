@@ -113,28 +113,40 @@ resource linkMonitor 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024
   parent: privateDnsZoneMonitor
   name: 'vnet-link-monitor'
   location: 'global'
-  properties: { virtualNetwork: { id: vnet.id }; registrationEnabled: false }
+  properties: {
+    virtualNetwork: { id: vnet.id }
+    registrationEnabled: false
+  }
 }
 
 resource linkOms 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
   parent: privateDnsZoneOms
   name: 'vnet-link-oms'
   location: 'global'
-  properties: { virtualNetwork: { id: vnet.id }; registrationEnabled: false }
+  properties: {
+    virtualNetwork: { id: vnet.id }
+    registrationEnabled: false
+  }
 }
 
 resource linkOds 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
   parent: privateDnsZoneOds
   name: 'vnet-link-ods'
   location: 'global'
-  properties: { virtualNetwork: { id: vnet.id }; registrationEnabled: false }
+  properties: {
+    virtualNetwork: { id: vnet.id }
+    registrationEnabled: false
+  }
 }
 
 resource linkAgentsvc 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2024-06-01' = {
   parent: privateDnsZoneAgentsvc
   name: 'vnet-link-agentsvc'
   location: 'global'
-  properties: { virtualNetwork: { id: vnet.id }; registrationEnabled: false }
+  properties: {
+    virtualNetwork: { id: vnet.id }
+    registrationEnabled: false
+  }
 }
 
 output vnetName string = vnet.name
