@@ -19,7 +19,7 @@ spec:
         runAsUser: 1000
       containers:
         - name: storefront
-          image: "acrzava3lnfkod3vrxjw.azurecr.io/zava-storefront:latest"
+          image: "${ACR_NAME}.azurecr.io/zava-storefront:latest"
           ports:
             - containerPort: 3000
           envFrom:
