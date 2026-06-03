@@ -1,10 +1,10 @@
 targetScope = 'subscription'
 
 @description('Azure region for all resources')
-param location string = 'swedencentral'
+param location string
 
 @description('Resource group name')
-param resourceGroupName string = 'rg-enterprise-demo'
+param resourceGroupName string
 
 @description('Unique suffix for globally unique resource names')
 param uniqueSuffix string = take(uniqueString(subscription().subscriptionId, resourceGroupName), 13)
