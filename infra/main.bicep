@@ -120,6 +120,5 @@ output AI_APP_ID string = monitoring.outputs.appInsightsAppId
 output AI_CONNECTION_STRING string = monitoring.outputs.appInsightsConnectionString
 output AMPLS_NAME string = monitoring.outputs.amplsName
 output VNET_NAME string = vnet.outputs.vnetName
-output GITHUB_APP_CLIENT_ID string = githubAppClientId
 output KV_NAME string = githubAppClientId != '' ? keyvault.outputs.keyVaultName : ''
 output KV_URI string = githubAppClientId != '' ? keyvault.outputs.keyVaultUri : ''
