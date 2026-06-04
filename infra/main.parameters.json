@@ -7,6 +7,9 @@
     },
     "location": {
       "value": "${AZURE_LOCATION}"
+    },
+    "githubAppClientId": {
+      "value": "${GITHUB_APP_CLIENT_ID}"
     }
   }
 }
